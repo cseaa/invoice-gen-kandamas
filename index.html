@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Invoice Pro Ultimate</title>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,356 +12,474 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
                         dark: {
                             bg: '#0f172a',
                             surface: '#1e293b',
                             border: '#334155',
-                            text: '#f1f5f9',
+                            text: '#f8fafc',
                             muted: '#94a3b8'
+                        }
+                    },
+                    boxShadow: {
+                        'gpay': '0 -4px 20px -5px rgba(0, 0, 0, 0.1)',
+                        'float': '0 10px 40px -10px rgba(0, 0, 0, 0.2)'
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'slide-down': 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'gpay-open': 'gpayOpen 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards'
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' }
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(0)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        gpayOpen: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0.5' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
                         }
                     }
                 }
             }
         }
     </script>
-    
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
     <style>
-        /* --- CORE STYLES --- */
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            user-select: none; 
         }
-
-        /* --- DARK MODE OVERRIDES --- */
-        .dark body { background-color: #0f172a; color: #f1f5f9; }
-        .dark .bg-white { background-color: #1e293b !important; color: #f1f5f9; border-color: #334155; }
-        .dark .bg-gray-50 { background-color: #0f172a !important; }
-        .dark .bg-gray-100 { background-color: #334155 !important; color: #f1f5f9; }
-        .dark .text-gray-900, .dark .text-gray-800 { color: #f8fafc !important; }
-        .dark .text-gray-700 { color: #e2e8f0 !important; }
-        .dark .text-gray-600, .dark .text-gray-500 { color: #94a3b8 !important; }
-        .dark .text-gray-400 { color: #64748b !important; }
-        .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #334155 !important; }
-        .dark input, .dark select, .dark textarea { 
-            background-color: #334155 !important; 
-            color: white !important; 
-            border-color: #475569 !important; 
-        }
-        .dark input::placeholder { color: #64748b; }
-        
-        /* --- UTILITIES --- */
+        .dark body { background-color: #0f172a; color: #f8fafc; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .text-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* --- ANIMATIONS --- */
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* --- PRINT STYLES --- */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .dark .glass-effect {
+            background: rgba(30, 41, 59, 0.7);
+        }
+        .gpay-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            background: white;
+            z-index: 50;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+        .dark .gpay-sheet {
+            background: #1e293b;
+            border-top: 1px solid #334155;
+        }
+        .gpay-sheet.active {
+            transform: translateY(0);
+        }
+        .chart-bar {
+            transition: height 1s ease-out;
+            height: 0;
+        }
         @media print {
-            @page { margin: 0; size: auto; }
             body { background: white !important; color: black !important; }
-            body * { visibility: hidden; }
-            #invoice-preview-container, #invoice-preview-container * {
-                visibility: visible;
-                color-adjust: exact !important;
-                -webkit-print-color-adjust: exact !important;
-            }
-            #invoice-preview-container {
-                position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
-                background: white !important;
-                box-shadow: none !important;
+            #app-root > *:not(#invoice-preview-container) { display: none; }
+            #invoice-preview-container { 
+                display: block !important; 
+                position: absolute; 
+                top: 0; 
+                left: 0; 
+                width: 100%; 
+                margin: 0; 
+                padding: 0;
             }
         }
     </style>
 </head>
-<body class="bg-gray-100 h-[100dvh] w-full flex justify-center overflow-hidden text-gray-800">
+<body class="bg-gray-50 h-[100dvh] w-full flex justify-center overflow-hidden text-gray-800 transition-colors duration-300">
 
-    <!-- APP CONTAINER -->
-    <div id="app-root" class="w-full h-full bg-white relative flex flex-col overflow-hidden max-w-lg mx-auto shadow-2xl transition-colors duration-300">
+    <div id="app-root" class="w-full h-full bg-white dark:bg-dark-bg relative flex flex-col overflow-hidden max-w-md mx-auto shadow-2xl transition-colors duration-300">
         
-        <!-- ONBOARDING OVERLAY (SHOWN IF NO PROFILE) -->
-        <div id="onboarding-screen" class="absolute inset-0 z-50 bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700 hidden flex-col items-center justify-center p-8 text-white">
-            <div class="w-full max-w-sm space-y-8 scale-in">
-                <div class="text-center">
-                    <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-md border border-white/30 shadow-2xl">
-                        <i data-lucide="trending-up" class="w-12 h-12 text-white"></i>
+        <div id="onboarding-overlay" class="absolute inset-0 z-[100] bg-gradient-to-br from-yellow-600 via-yellow-500 to-amber-700 hidden flex-col items-center justify-center p-8 text-white transition-opacity duration-500">
+            <div class="w-full max-w-sm space-y-10 animate-fade-in">
+                <div class="text-center transform transition-all duration-700 hover:scale-105">
+                    <div class="w-28 h-28 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-xl border border-white/20 shadow-2xl ring-4 ring-white/10">
+                        <i data-lucide="gem" class="w-14 h-14 text-white drop-shadow-md"></i>
                     </div>
-                    <h1 class="text-3xl font-black mb-2 leading-tight">Start Increasing Your <br/>Business Growth</h1>
-                    <p class="text-yellow-100 font-medium">Professional Invoicing for Pros.</p>
+                    <h1 class="text-4xl font-black mb-3 leading-tight tracking-tight">Invoice Pro<span class="text-yellow-200">.</span></h1>
+                    <p class="text-yellow-50 font-medium text-lg opacity-90">Manage Business Like a CEO.</p>
                 </div>
 
-                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 space-y-4 shadow-xl">
-                    <div>
-                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-wider">Company Name</label>
-                        <input id="ob-name" type="text" placeholder="e.g. Alpha Solutions" class="w-full bg-white/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-wider">Mobile Number</label>
-                        <div class="flex gap-2">
-                             <input id="ob-code" type="text" value="+91" class="w-16 bg-white/20 border border-white/10 rounded-xl p-3 text-white text-center font-bold">
-                             <input id="ob-phone" type="tel" placeholder="98765 43210" class="flex-1 bg-white/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold">
+                <div class="bg-white/10 backdrop-blur-2xl rounded-3xl p-8 border border-white/20 space-y-6 shadow-xl">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-widest">Business Name</label>
+                        <div class="relative group">
+                            <i data-lucide="building-2" class="absolute left-4 top-4 w-5 h-5 text-yellow-100 opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                            <input id="ob-name" type="text" placeholder="e.g. Acme Corp" class="w-full bg-black/20 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold transition-all">
                         </div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-wider">Email</label>
-                        <input id="ob-email" type="email" placeholder="business@example.com" class="w-full bg-white/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-widest">WhatsApp Number</label>
+                        <div class="flex gap-3">
+                             <input id="ob-code" type="text" value="+91" class="w-20 bg-black/20 border border-white/10 rounded-2xl py-4 text-white text-center font-bold focus:outline-none focus:ring-2 focus:ring-white/50">
+                             <div class="relative flex-1 group">
+                                <i data-lucide="smartphone" class="absolute left-4 top-4 w-5 h-5 text-yellow-100 opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                                <input id="ob-phone" type="tel" placeholder="98765 43210" class="w-full bg-black/20 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold transition-all">
+                             </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-widest">Official Email</label>
+                        <div class="relative group">
+                            <i data-lucide="mail" class="absolute left-4 top-4 w-5 h-5 text-yellow-100 opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                            <input id="ob-email" type="email" placeholder="ceo@acme.com" class="w-full bg-black/20 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold transition-all">
+                        </div>
                     </div>
                 </div>
 
-                <button onclick="completeOnboarding()" class="w-full bg-white text-yellow-700 p-4 rounded-xl font-black text-lg shadow-lg shadow-black/20 hover:bg-yellow-50 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    Get Started <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                <button onclick="completeOnboarding()" class="w-full bg-white text-amber-700 p-5 rounded-2xl font-black text-xl shadow-lg shadow-black/20 hover:bg-yellow-50 active:scale-95 transition-all flex items-center justify-center gap-3 group">
+                    Start Growth <i data-lucide="arrow-right" class="w-6 h-6 group-hover:translate-x-1 transition-transform"></i>
                 </button>
             </div>
         </div>
 
-        <!-- HEADER -->
-        <div id="top-bar" class="bg-white/90 backdrop-blur-md px-5 py-4 flex items-center justify-between sticky top-0 z-30 border-b border-gray-100 transition-colors duration-300">
-            <div class="flex items-center gap-3 w-full overflow-hidden">
-                <button id="back-btn" class="hidden p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors active:scale-95">
+        <div id="top-bar" class="glass-effect px-6 py-4 flex items-center justify-between sticky top-0 z-30 border-b border-gray-100 dark:border-dark-border transition-all duration-300">
+            <div class="flex items-center gap-4 w-full overflow-hidden">
+                <button id="back-btn" class="hidden p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors active:scale-90">
                     <i data-lucide="arrow-left" class="w-6 h-6 text-gray-700 dark:text-gray-200"></i>
                 </button>
                 <div class="flex flex-col overflow-hidden min-w-0">
-                    <h1 id="page-title" class="text-xl font-bold text-gray-900 tracking-tight text-truncate">Invoice Pro</h1>
-                    <span id="page-subtitle" class="text-[10px] text-gray-500 font-medium hidden text-truncate">Dashboard</span>
+                    <h1 id="page-title" class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight text-truncate">Dashboard</h1>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span id="page-subtitle" class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider text-truncate">Online</span>
+                    </div>
                 </div>
             </div>
-            <div id="header-actions" class="flex gap-2 flex-shrink-0"></div>
+            <div id="header-actions" class="flex gap-3 flex-shrink-0">
+                <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:rotate-12 transition-transform">
+                    <i data-lucide="sun-moon" class="w-5 h-5"></i>
+                </button>
+                <button class="relative p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-dark-bg rounded-full"></span>
+                </button>
+            </div>
         </div>
 
-        <!-- SCROLLABLE CONTENT AREA -->
-        <div id="app-content" class="flex-1 overflow-y-auto scrollbar-hide pb-28 relative bg-gray-50 transition-colors duration-300">
-            <!-- Dynamic Content Injected Here -->
-        </div>
+        <div id="app-content" class="flex-1 overflow-y-auto scrollbar-hide pb-32 relative bg-gray-50 dark:bg-dark-bg transition-colors duration-300"></div>
 
-        <!-- BOTTOM NAVIGATION -->
-        <div id="bottom-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-2 pb-safe flex justify-between items-end shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-30 h-[85px] transition-colors duration-300">
-            <button onclick="navigateTo('home')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="home">
-                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+        <div id="bottom-nav" class="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-surface/95 backdrop-blur-lg border-t border-gray-100 dark:border-dark-border px-6 py-2 pb-safe flex justify-between items-end shadow-gpay z-30 h-[90px] transition-colors duration-300">
+            <button onclick="navigateTo('home')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-4 transition-all duration-300" data-tab="home">
+                <div class="relative">
+                    <i data-lucide="layout-grid" class="w-6 h-6 transition-transform group-active:scale-90"></i>
+                    <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-current rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity"></span>
+                </div>
                 <span class="text-[10px] font-bold tracking-wide">Home</span>
             </button>
             
-            <button onclick="navigateTo('history')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="history">
-                <i data-lucide="file-clock" class="w-6 h-6"></i>
-                <span class="text-[10px] font-bold tracking-wide">History</span>
+            <button onclick="navigateTo('reports')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-4 transition-all duration-300" data-tab="reports">
+                <i data-lucide="bar-chart-3" class="w-6 h-6 transition-transform group-active:scale-90"></i>
+                <span class="text-[10px] font-bold tracking-wide">Reports</span>
             </button>
             
-            <!-- Floating Action Button -->
             <div class="relative -top-8 group z-40">
-                <div class="absolute inset-0 bg-blue-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                <button onclick="navigateTo('create')" class="relative bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-16 h-16 rounded-2xl shadow-xl shadow-blue-300/50 transform transition-all active:scale-90 flex items-center justify-center border-4 border-white dark:border-slate-800">
+                <div class="absolute inset-0 bg-blue-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+                <button onclick="openActionSheet()" class="relative bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-16 h-16 rounded-2xl shadow-float transform transition-all active:scale-90 active:rotate-90 flex items-center justify-center border-4 border-white dark:border-dark-bg">
                     <i data-lucide="plus" class="w-8 h-8 stroke-[3]"></i>
                 </button>
             </div>
 
-            <button onclick="navigateTo('profile')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="profile">
-                <i data-lucide="user-square" class="w-6 h-6"></i>
-                <span class="text-[10px] font-bold tracking-wide">Profile</span>
+            <button onclick="navigateTo('history')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-4 transition-all duration-300" data-tab="history">
+                <i data-lucide="history" class="w-6 h-6 transition-transform group-active:scale-90"></i>
+                <span class="text-[10px] font-bold tracking-wide">History</span>
             </button>
             
-            <button onclick="navigateTo('settings')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="settings">
-                <i data-lucide="settings-2" class="w-6 h-6"></i>
+            <button onclick="navigateTo('settings')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-4 transition-all duration-300" data-tab="settings">
+                <i data-lucide="settings-2" class="w-6 h-6 transition-transform group-active:scale-90"></i>
                 <span class="text-[10px] font-bold tracking-wide">Settings</span>
             </button>
         </div>
 
-        <!-- MODAL CONTAINER (For Payments etc) -->
-        <div id="modal-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
-            <div id="modal-content" class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up">
-                <!-- Injected via JS -->
+        <div id="backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="closeAllSheets()"></div>
+
+        <div id="action-sheet" class="gpay-sheet p-6">
+            <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white mb-6 px-2">Quick Actions</h3>
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <button onclick="closeAllSheets(); navigateTo('create')" class="flex flex-col items-center gap-3 group">
+                    <div class="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 group-active:scale-95 transition-transform">
+                        <i data-lucide="file-plus-2" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-400">Invoice</span>
+                </button>
+                <button class="flex flex-col items-center gap-3 group">
+                    <div class="w-14 h-14 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center text-purple-600 dark:text-purple-400 group-active:scale-95 transition-transform">
+                        <i data-lucide="scan-line" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-400">Scan</span>
+                </button>
+                <button class="flex flex-col items-center gap-3 group">
+                    <div class="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-active:scale-95 transition-transform">
+                        <i data-lucide="users" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-400">Client</span>
+                </button>
+                <button class="flex flex-col items-center gap-3 group">
+                    <div class="w-14 h-14 bg-orange-50 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400 group-active:scale-95 transition-transform">
+                        <i data-lucide="package" class="w-7 h-7"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-600 dark:text-gray-400">Items</span>
+                </button>
+            </div>
+            <button onclick="closeAllSheets()" class="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white py-4 rounded-xl font-bold active:scale-95 transition-transform">Cancel</button>
+        </div>
+
+        <div id="payment-sheet" class="gpay-sheet p-6">
+            <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-6"></div>
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 dark:text-green-400">
+                    <i data-lucide="banknote" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-black text-gray-900 dark:text-white">Record Payment</h3>
+                <p id="pay-sheet-subtitle" class="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">Invoice #INV-001</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Amount Received</label>
+                    <div class="relative mt-1">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">₹</span>
+                        <input type="number" id="payment-amount" class="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-green-500 rounded-2xl pl-10 pr-4 py-4 font-black text-2xl text-gray-900 dark:text-white outline-none transition-all placeholder-gray-300">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setPaymentMode('cash')" class="pay-mode-btn p-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors active:scale-95">
+                        <i data-lucide="coins" class="w-4 h-4"></i> Cash
+                    </button>
+                    <button onclick="setPaymentMode('online')" class="pay-mode-btn p-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors active:scale-95">
+                        <i data-lucide="smartphone" class="w-4 h-4"></i> UPI/Online
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeAllSheets()" class="flex-1 py-4 font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors">Cancel</button>
+                <button onclick="confirmPayment()" class="flex-[2] bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-green-200 dark:shadow-none active:scale-95 transition-transform flex items-center justify-center gap-2">
+                    Confirm Payment <i data-lucide="check" class="w-5 h-5"></i>
+                </button>
             </div>
         </div>
 
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- 1. STATE & CONSTANTS ---
-        const DEFAULT_PROFILE = { name: '', phone: '', email: '', logoText: '', code: '+91', isSetup: false };
         const THEMES = {
-            'blue': { name: 'Professional Blue', from: 'from-blue-600', to: 'to-indigo-700', text: 'text-blue-600' },
-            'gold': { name: 'Premium Gold', from: 'from-yellow-600', to: 'to-yellow-500', text: 'text-yellow-600' },
-            'black': { name: 'Minimal Black', from: 'from-gray-900', to: 'to-black', text: 'text-gray-900' },
-            'green': { name: 'Corporate Green', from: 'from-emerald-600', to: 'to-teal-700', text: 'text-emerald-600' },
-            'purple': { name: 'Creative Purple', from: 'from-purple-600', to: 'to-fuchsia-700', text: 'text-purple-600' }
+            'blue': { name: 'Professional Blue', from: 'from-blue-600', to: 'to-indigo-700', text: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+            'gold': { name: 'Premium Gold', from: 'from-yellow-600', to: 'to-amber-600', text: 'text-yellow-700', bg: 'bg-yellow-50', border: 'border-yellow-100' },
+            'black': { name: 'Executive Black', from: 'from-gray-900', to: 'to-black', text: 'text-gray-900', bg: 'bg-gray-100', border: 'border-gray-200' },
+            'forest': { name: 'Forest Green', from: 'from-emerald-600', to: 'to-green-700', text: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+            'royal': { name: 'Royal Purple', from: 'from-purple-600', to: 'to-indigo-700', text: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-100' }
         };
 
-        let state = {
-            tab: 'home',
-            step: 1,
-            invoices: JSON.parse(localStorage.getItem('invoices_pro')) || [],
-            profile: JSON.parse(localStorage.getItem('profile_pro')) || DEFAULT_PROFILE,
-            settings: JSON.parse(localStorage.getItem('settings_pro')) || { appTheme: 'light', invoiceColor: 'gold' },
-            draft: resetDraft()
+        const DEFAULT_STATE = {
+            profile: { name: '', phone: '', email: '', code: '+91', isSetup: false },
+            invoices: [],
+            settings: { theme: 'light', color: 'gold' },
+            draft: null
         };
 
-        function resetDraft() {
-            return {
-                clientName: '', clientPhone: '', clientCode: '+91',
-                dueDate: new Date().toISOString().split('T')[0],
-                items: [{ id: Date.now(), name: '', qty: 1, price: 0 }]
-            };
+        let state = JSON.parse(localStorage.getItem('invoice_pro_v3')) || DEFAULT_STATE;
+        let currentInvId = null;
+
+        function saveState() {
+            localStorage.setItem('invoice_pro_v3', JSON.stringify(state));
         }
 
-        // --- 2. CORE UTILITIES ---
-        function saveData() {
-            localStorage.setItem('invoices_pro', JSON.stringify(state.invoices));
-            localStorage.setItem('profile_pro', JSON.stringify(state.profile));
-            localStorage.setItem('settings_pro', JSON.stringify(state.settings));
-            applyAppTheme();
-        }
-
-        function applyAppTheme() {
-            const root = document.documentElement;
-            if (state.settings.appTheme === 'dark') root.classList.add('dark');
-            else root.classList.remove('dark');
-        }
-
-        function formatCurrency(amount) { return '₹' + Number(amount).toLocaleString('en-IN'); }
-        function formatDate(d) { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
-        
-        function getStatus(inv) {
-            if (inv.balance <= 0) return 'Paid';
-            if (inv.paid > 0) return 'Partial';
-            return 'Pending';
-        }
-
-        function initApp() {
-            applyAppTheme();
+        function init() {
+            if (state.settings.theme === 'dark') document.documentElement.classList.add('dark');
+            
             if (!state.profile.isSetup) {
-                document.getElementById('onboarding-screen').classList.remove('hidden');
-                document.getElementById('onboarding-screen').classList.add('flex');
+                const overlay = document.getElementById('onboarding-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
             } else {
                 navigateTo('home');
             }
+            lucide.createIcons();
         }
 
-        // --- 3. ONBOARDING ---
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            state.settings.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            saveState();
+        }
+
         function completeOnboarding() {
-            const name = document.getElementById('ob-name').value;
-            const phone = document.getElementById('ob-phone').value;
-            const code = document.getElementById('ob-code').value;
-            const email = document.getElementById('ob-email').value;
+            const name = document.getElementById('ob-name').value.trim();
+            const phone = document.getElementById('ob-phone').value.trim();
+            const email = document.getElementById('ob-email').value.trim();
+            const code = document.getElementById('ob-code').value.trim();
 
-            if (!name || !phone) { alert('Please fill in Company Name and Phone.'); return; }
+            if (!name || !phone) {
+                alert('Please enter Business Name and Phone Number');
+                return;
+            }
 
-            state.profile = { 
-                name, phone, email, code, 
-                logoText: name.substring(0,2).toUpperCase(), 
-                isSetup: true 
-            };
-            saveData();
-            
-            // Animate out
-            const screen = document.getElementById('onboarding-screen');
-            screen.style.opacity = '0';
-            screen.style.transition = 'opacity 0.5s ease';
+            state.profile = { name, phone, email, code, isSetup: true };
+            saveState();
+
+            const overlay = document.getElementById('onboarding-overlay');
+            overlay.classList.add('opacity-0');
             setTimeout(() => {
-                screen.classList.add('hidden');
+                overlay.classList.add('hidden');
                 navigateTo('home');
             }, 500);
         }
 
-        // --- 4. NAVIGATION ---
-        function navigateTo(tab, data = null) {
-            state.tab = tab;
+        function navigateTo(tab, params = null) {
+            const content = document.getElementById('app-content');
+            const title = document.getElementById('page-title');
+            const subtitle = document.getElementById('page-subtitle');
+            const backBtn = document.getElementById('back-btn');
             
-            // Tab Styles
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                const isActive = btn.dataset.tab === tab;
-                btn.className = `nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3 transition-colors ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600'}`;
+                if (btn.dataset.tab === tab) {
+                    btn.classList.add('text-blue-600', 'dark:text-blue-400', 'active');
+                    btn.classList.remove('text-gray-400', 'dark:text-gray-500');
+                } else {
+                    btn.classList.remove('text-blue-600', 'dark:text-blue-400', 'active');
+                    btn.classList.add('text-gray-400', 'dark:text-gray-500');
+                }
             });
 
-            // Header Logic
-            const title = document.getElementById('page-title');
-            const sub = document.getElementById('page-subtitle');
-            const backBtn = document.getElementById('back-btn');
+            backBtn.classList.add('hidden');
+            subtitle.parentElement.classList.remove('hidden');
 
             if (tab === 'home') {
-                title.innerText = state.profile.name || 'Invoice Pro';
-                sub.innerText = 'Business Dashboard';
-                sub.classList.remove('hidden');
-                backBtn.classList.add('hidden');
-            } else if (tab === 'invoice-detail') {
-                 title.innerText = 'Invoice Details';
-                 sub.classList.add('hidden');
-                 backBtn.classList.remove('hidden');
-                 backBtn.onclick = () => navigateTo('history');
-            } else {
-                title.innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
-                if(tab === 'create') title.innerText = 'New Invoice';
-                sub.classList.add('hidden');
+                title.innerText = state.profile.name || 'Dashboard';
+                subtitle.innerText = 'Overview';
+                renderHome(content);
+            } else if (tab === 'history') {
+                title.innerText = 'History';
+                subtitle.innerText = 'Transactions';
+                renderHistory(content);
+            } else if (tab === 'reports') {
+                title.innerText = 'Analytics';
+                subtitle.innerText = 'Growth';
+                renderReports(content);
+            } else if (tab === 'settings') {
+                title.innerText = 'Settings';
+                subtitle.innerText = 'Preferences';
+                renderSettings(content);
+            } else if (tab === 'create') {
+                title.innerText = 'New Invoice';
+                subtitle.parentElement.classList.add('hidden');
                 backBtn.classList.remove('hidden');
-                backBtn.onclick = () => {
-                    if (tab === 'create' && state.step > 1) setCreateStep(state.step - 1);
-                    else navigateTo('home');
+                backBtn.onclick = () => navigateTo('home');
+                if (!params) state.draft = {
+                    client: '', phone: '', code: '+91', date: new Date().toISOString().split('T')[0],
+                    items: [{id: Date.now(), name: '', price: '', qty: 1}]
                 };
+                renderCreate(content);
+            } else if (tab === 'detail') {
+                title.innerText = 'Invoice Details';
+                subtitle.parentElement.classList.add('hidden');
+                backBtn.classList.remove('hidden');
+                backBtn.onclick = () => navigateTo('history');
+                renderDetail(content, params);
             }
-
-            // Render
-            const content = document.getElementById('app-content');
-            content.innerHTML = '';
             
-            if (tab === 'home') renderHome(content);
-            else if (tab === 'create') { state.step = 1; state.draft = resetDraft(); if(data) state.draft=data; renderCreate(content); }
-            else if (tab === 'history') renderHistory(content);
-            else if (tab === 'profile') renderProfile(content);
-            else if (tab === 'settings') renderSettings(content);
-            else if (tab === 'invoice-detail' && data) renderInvoiceDetail(content, data);
-
             lucide.createIcons();
         }
 
-        // --- 5. RENDERERS ---
+        function formatCurrency(val) {
+            return '₹' + Number(val).toLocaleString('en-IN');
+        }
 
         function renderHome(container) {
-            const totalRev = state.invoices.reduce((sum, i) => sum + (i.paid || 0), 0);
-            const totalPending = state.invoices.reduce((sum, i) => sum + (i.balance || 0), 0);
+            const totalPending = state.invoices.reduce((sum, inv) => sum + (inv.total - inv.paid), 0);
+            const totalRevenue = state.invoices.reduce((sum, inv) => sum + inv.paid, 0);
+            const pendingCount = state.invoices.filter(inv => inv.total - inv.paid > 0).length;
 
             container.innerHTML = `
-                <div class="p-5 space-y-6 fade-in pb-20">
-                    <!-- Stats -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="col-span-2 bg-gradient-to-br from-yellow-600 to-yellow-500 rounded-3xl p-6 text-white shadow-lg shadow-yellow-200/50 dark:shadow-none relative overflow-hidden">
-                            <div class="relative z-10">
-                                <p class="text-yellow-100 text-xs font-bold uppercase tracking-widest mb-1">Total Collected</p>
-                                <h2 class="text-4xl font-black tracking-tighter">${formatCurrency(totalRev)}</h2>
+                <div class="p-6 space-y-8 animate-fade-in">
+                    
+                    <div class="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 dark:from-blue-900 dark:to-slate-900 rounded-[2rem] p-6 text-white shadow-2xl">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Balance</p>
+                                    <h2 class="text-4xl font-black tracking-tighter">${formatCurrency(totalRevenue)}</h2>
+                                </div>
+                                <div class="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
+                                    <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
+                                </div>
                             </div>
-                            <i data-lucide="wallet" class="absolute bottom-4 right-4 w-16 h-16 text-white/10"></i>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
-                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Pending</p>
-                            <h3 class="text-xl font-black text-gray-800 dark:text-gray-100">${formatCurrency(totalPending)}</h3>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
-                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Invoices</p>
-                            <h3 class="text-xl font-black text-gray-800 dark:text-gray-100">${state.invoices.length}</h3>
+                            <div class="flex gap-4">
+                                <div class="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/5">
+                                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Pending</p>
+                                    <p class="text-lg font-bold text-orange-400">${formatCurrency(totalPending)}</p>
+                                </div>
+                                <div class="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/5">
+                                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Invoices</p>
+                                    <p class="text-lg font-bold text-blue-400">${state.invoices.length}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Recent -->
                     <div>
-                        <h3 class="text-gray-800 dark:text-gray-200 font-bold text-sm uppercase tracking-wider mb-3 px-1">Recent Invoices</h3>
-                        <div class="space-y-3">
-                            ${state.invoices.length === 0 ? `
-                                <div class="text-center py-10 opacity-50">
-                                    <p class="text-sm font-medium">No invoices yet</p>
-                                </div>
-                            ` : state.invoices.slice(0, 5).map(inv => renderInvoiceCard(inv)).join('')}
+                        <div class="flex justify-between items-end px-2 mb-4">
+                            <h3 class="text-gray-900 dark:text-white font-black text-lg">Pending Actions</h3>
+                            <span class="text-xs font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-3 py-1 rounded-full">${pendingCount} Pending</span>
+                        </div>
+                        <div class="space-y-4">
+                            ${state.invoices.filter(i => i.total - i.paid > 0).length === 0 ? 
+                                `<div class="text-center py-12 opacity-50">
+                                    <i data-lucide="check-circle-2" class="w-12 h-12 mx-auto mb-3 text-green-500"></i>
+                                    <p class="font-medium text-gray-500">All caught up! Great job.</p>
+                                </div>` :
+                                state.invoices.filter(i => i.total - i.paid > 0).map(inv => renderInvoiceCard(inv)).join('')
+                            }
                         </div>
                     </div>
                 </div>
@@ -371,335 +487,377 @@
         }
 
         function renderInvoiceCard(inv) {
-            const status = getStatus(inv);
-            const statusColors = {
-                'Paid': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                'Partial': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                'Pending': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-            };
+            const balance = inv.total - inv.paid;
+            const isPaid = balance <= 0;
+            const statusColor = isPaid ? 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400' : 'text-orange-600 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-400';
+            const statusText = isPaid ? 'Paid' : 'Pending';
 
             return `
-                <div onclick="navigateTo('invoice-detail', '${inv.id}')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col gap-3 active:scale-[0.98] transition-transform cursor-pointer">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm bg-gray-900 dark:bg-slate-600">
+                <div onclick="navigateTo('detail', '${inv.id}')" class="bg-white dark:bg-dark-surface p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border active:scale-[0.98] transition-all duration-200 group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-lg font-black text-gray-700 dark:text-gray-300 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 transition-colors">
                                 ${inv.client.substring(0,1).toUpperCase()}
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-800 dark:text-gray-100 text-sm">${inv.client}</h4>
-                                <p class="text-[10px] text-gray-500 dark:text-gray-400">#${inv.id} • ${formatDate(inv.date)}</p>
+                                <h4 class="font-bold text-gray-900 dark:text-white text-base">${inv.client}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">#${inv.id}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="block font-bold text-gray-900 dark:text-white text-base">${formatCurrency(inv.total)}</span>
-                            ${inv.balance > 0 ? `<span class="text-[10px] text-red-500 font-bold">Bal: ${formatCurrency(inv.balance)}</span>` : ''}
+                            <p class="font-black text-gray-900 dark:text-white text-lg">${formatCurrency(inv.total)}</p>
+                            <span class="text-[10px] font-bold ${statusColor} px-2.5 py-1 rounded-lg inline-block mt-1">${statusText}</span>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-slate-700 mt-1">
-                        <span class="${statusColors[status]} text-[10px] font-bold px-2.5 py-1 rounded-lg">${status}</span>
-                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 dark:text-slate-600"></i>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderInvoiceDetail(container, invId) {
-            const inv = state.invoices.find(i => i.id === invId);
-            if (!inv) return;
-            const status = getStatus(inv);
-            const theme = THEMES[state.settings.invoiceColor];
-
-            container.innerHTML = `
-                <div class="p-5 pb-32 fade-in space-y-6">
-                    <!-- Status Card -->
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs text-gray-400 font-bold uppercase">Status</p>
-                            <h2 class="text-2xl font-black ${status === 'Paid' ? 'text-green-500' : 'text-orange-500'}">${status}</h2>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs text-gray-400 font-bold uppercase">Balance Due</p>
-                            <h2 class="text-2xl font-black text-gray-800 dark:text-white">${formatCurrency(inv.balance)}</h2>
-                        </div>
-                    </div>
-
-                    <!-- Payment Actions -->
-                    ${inv.balance > 0 ? `
-                    <div class="flex gap-3">
-                        <button onclick="openPaymentModal('${inv.id}')" class="flex-1 bg-gray-900 dark:bg-white dark:text-slate-900 text-white py-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
-                            <i data-lucide="credit-card" class="w-4 h-4"></i> Record Payment
+                    
+                    ${!isPaid ? `
+                    <div class="flex gap-3 pt-4 border-t border-gray-50 dark:border-gray-800">
+                        <button onclick="event.stopPropagation(); openPaymentSheet('${inv.id}')" class="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-gray-200 dark:shadow-none active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <i data-lucide="banknote" class="w-3.5 h-3.5"></i> Pay
                         </button>
-                        <a href="https://wa.me/${(inv.clientCode+inv.clientPhone).replace(/\D/g,'')}?text=Invoice%20${inv.id}%20Pending:%20${formatCurrency(inv.balance)}" target="_blank" class="flex-1 bg-green-500 text-white py-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
-                            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+                        <a href="https://wa.me/${inv.code.replace('+','')}${inv.phone}?text=Hello ${inv.client}, your invoice ${inv.id} of ${formatCurrency(balance)} is pending. Please pay soon." target="_blank" onclick="event.stopPropagation()" class="flex-1 bg-green-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-green-200 dark:shadow-none active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Remind
                         </a>
                     </div>` : ''}
+                </div>
+            `;
+        }
 
-                    <!-- Invoice Preview (Mini) -->
-                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-none mx-auto border border-gray-100 dark:border-slate-700 max-w-sm overflow-hidden">
-                        <div class="bg-gradient-to-r ${theme.from} ${theme.to} p-6 text-white">
-                            <div class="flex justify-between items-start">
-                                <h2 class="font-bold text-lg">${state.profile.name}</h2>
-                                <span class="opacity-80 font-mono">${inv.id}</span>
-                            </div>
+        function renderReports(container) {
+            const data = [65, 40, 75, 55, 80, 95]; 
+            const max = Math.max(...data);
+
+            container.innerHTML = `
+                <div class="p-6 space-y-8 animate-fade-in">
+                    <div class="bg-white dark:bg-dark-surface p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-gray-900 dark:text-white">Revenue Growth</h3>
+                            <select class="bg-gray-50 dark:bg-gray-800 text-xs font-bold p-2 rounded-xl outline-none dark:text-white">
+                                <option>Last 6 Months</option>
+                                <option>This Year</option>
+                            </select>
                         </div>
-                        <div class="p-6 space-y-4">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500 dark:text-gray-400">Client</span>
-                                <span class="font-bold dark:text-gray-200">${inv.client}</span>
-                            </div>
-                            <div class="space-y-2 pt-2 border-t dark:border-slate-700">
-                                ${inv.items.map(i => `
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600 dark:text-gray-400">${i.name} x${i.qty}</span>
-                                        <span class="font-bold dark:text-gray-200">${formatCurrency(i.price * i.qty)}</span>
+                        <div class="flex items-end justify-between h-48 gap-2">
+                            ${data.map((val, i) => `
+                                <div class="flex-1 flex flex-col items-center gap-2 group">
+                                    <div class="w-full bg-blue-100 dark:bg-blue-900/30 rounded-t-xl relative overflow-hidden group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                                        <div class="absolute bottom-0 left-0 right-0 bg-blue-500 rounded-t-xl chart-bar group-hover:bg-blue-600 transition-all" style="height: ${(val/max)*100}%"></div>
                                     </div>
-                                `).join('')}
-                            </div>
-                            <div class="pt-4 border-t-2 border-dashed dark:border-slate-700 flex justify-between items-center">
-                                <span class="font-bold text-gray-500">Total</span>
-                                <span class="text-xl font-black ${theme.text}">${formatCurrency(inv.total)}</span>
-                            </div>
-                            <div class="flex justify-between text-sm text-green-600 font-bold">
-                                <span>Paid</span>
-                                <span>${formatCurrency(inv.paid)}</span>
-                            </div>
+                                    <span class="text-[10px] font-bold text-gray-400">${['Jan','Feb','Mar','Apr','May','Jun'][i]}</span>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
 
-                    <!-- Additional Actions -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="alert('PDF Download feature simulates opening a print dialog.'); window.print()" class="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-3 rounded-xl font-bold">Download PDF</button>
-                        <button onclick="editInvoice('${inv.id}')" class="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-3 rounded-xl font-bold">Edit Invoice</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-orange-50 dark:bg-orange-900/20 p-5 rounded-3xl border border-orange-100 dark:border-orange-900/30">
+                            <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/50 rounded-xl flex items-center justify-center text-orange-600 dark:text-orange-400 mb-3">
+                                <i data-lucide="users" class="w-5 h-5"></i>
+                            </div>
+                            <p class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">New Clients</p>
+                            <h3 class="text-2xl font-black text-orange-900 dark:text-orange-100">12</h3>
+                        </div>
+                         <div class="bg-purple-50 dark:bg-purple-900/20 p-5 rounded-3xl border border-purple-100 dark:border-purple-900/30">
+                            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
+                                <i data-lucide="percent" class="w-5 h-5"></i>
+                            </div>
+                            <p class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1">Conversion</p>
+                            <h3 class="text-2xl font-black text-purple-900 dark:text-purple-100">84%</h3>
+                        </div>
                     </div>
                 </div>
             `;
-            lucide.createIcons();
+            setTimeout(() => {
+                document.querySelectorAll('.chart-bar').forEach(el => {
+                    const h = el.style.height;
+                    el.style.height = '0';
+                    setTimeout(() => el.style.height = h, 100);
+                });
+            }, 50);
         }
 
-        function renderCreate(container) { setCreateStep(state.step); }
+        function renderSettings(container) {
+            container.innerHTML = `
+                <div class="p-6 space-y-6 animate-fade-in">
+                    <div class="bg-white dark:bg-dark-surface rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-dark-border text-center">
+                        <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-full mx-auto flex items-center justify-center text-2xl font-black text-white shadow-lg mb-4">
+                            ${state.profile.name.substring(0,2).toUpperCase()}
+                        </div>
+                        <h2 class="text-xl font-black text-gray-900 dark:text-white">${state.profile.name}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">${state.profile.email}</p>
+                        <button onclick="completeOnboarding()" class="mt-4 text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-4 py-2 rounded-xl">Edit Profile</button>
+                    </div>
 
-        function setCreateStep(step) {
-            state.step = step;
-            const container = document.getElementById('app-content');
-            const total = state.draft.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
-            
-            let html = '';
-            if (step === 1) {
-                html = `
-                    <div class="p-5 space-y-6 slide-in">
-                        <div class="flex gap-2"><div class="h-1 bg-yellow-500 flex-1 rounded"></div><div class="h-1 bg-gray-200 dark:bg-slate-700 flex-1 rounded"></div><div class="h-1 bg-gray-200 dark:bg-slate-700 flex-1 rounded"></div></div>
-                        <h2 class="text-2xl font-black text-gray-800 dark:text-white">Client Details</h2>
-                        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 space-y-4">
-                            <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Client Name</label><input type="text" id="inp-client" value="${state.draft.clientName}" class="w-full p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 border-2 border-transparent focus:border-yellow-500 outline-none font-bold text-gray-800 dark:text-white"></div>
-                            <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Phone</label><div class="flex gap-2"><input id="inp-code" value="${state.draft.clientCode}" class="w-16 p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold text-center dark:text-white"><input type="tel" id="inp-phone" value="${state.draft.clientPhone}" class="flex-1 p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 border-2 border-transparent focus:border-yellow-500 outline-none font-bold text-gray-800 dark:text-white"></div></div>
-                            <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Due Date</label><input type="date" id="inp-date" value="${state.draft.dueDate}" class="w-full p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 border-2 border-transparent focus:border-yellow-500 outline-none font-bold text-gray-800 dark:text-white"></div>
-                        </div>
-                        <button onclick="setCreateStep(2)" class="w-full bg-yellow-600 text-white p-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">Next <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
-                    </div>`;
-            } else if (step === 2) {
-                html = `
-                    <div class="p-5 pb-32 slide-in min-h-full flex flex-col">
-                        <div class="flex gap-2 mb-4"><div class="h-1 bg-yellow-500 flex-1 rounded"></div><div class="h-1 bg-yellow-500 flex-1 rounded"></div><div class="h-1 bg-gray-200 dark:bg-slate-700 flex-1 rounded"></div></div>
-                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 sticky top-0 z-10 flex justify-between items-center mb-4">
-                             <div><span class="text-xs font-bold text-gray-400 uppercase">Total Bill</span><div class="text-2xl font-black text-yellow-600">${formatCurrency(total)}</div></div>
-                        </div>
-                        <div class="space-y-4 flex-1">
-                            ${state.draft.items.map((item, idx) => `
-                                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 space-y-3">
-                                    <div class="flex justify-between"><span class="text-xs font-bold bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded text-gray-500">Item ${idx+1}</span><button onclick="removeItem(${item.id})" class="text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
-                                    <input oninput="updateItem(${item.id}, 'name', this.value)" value="${item.name}" placeholder="Description" class="w-full p-3 bg-gray-50 dark:bg-slate-900 rounded-xl outline-none font-bold dark:text-white">
-                                    <div class="flex gap-3">
-                                        <div class="flex-1"><label class="text-[10px] font-bold text-gray-400 uppercase">Price</label><input type="number" oninput="updateItem(${item.id}, 'price', this.value)" value="${item.price}" class="w-full p-3 bg-gray-50 dark:bg-slate-900 rounded-xl outline-none font-bold dark:text-white"></div>
-                                        <div class="w-24"><label class="text-[10px] font-bold text-gray-400 uppercase">Qty</label><div class="flex bg-gray-50 dark:bg-slate-900 rounded-xl p-1"><button onclick="updateItem(${item.id},'qty',${Math.max(1,item.qty-1)})" class="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg shadow-sm flex items-center justify-center dark:text-white">-</button><div class="flex-1 text-center font-bold flex items-center justify-center dark:text-white">${item.qty}</div><button onclick="updateItem(${item.id},'qty',${item.qty+1})" class="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg shadow-sm flex items-center justify-center dark:text-white">+</button></div></div>
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider px-2">Invoice Themes</h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${Object.entries(THEMES).map(([key, theme]) => `
+                                <button onclick="setThemeColor('${key}')" class="flex items-center gap-4 p-4 rounded-2xl border transition-all ${state.settings.color === key ? 'bg-white dark:bg-dark-surface border-blue-500 ring-1 ring-blue-500 shadow-md' : 'bg-white dark:bg-dark-surface border-gray-100 dark:border-dark-border opacity-70'}">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br ${theme.from} ${theme.to} shadow-sm"></div>
+                                    <div class="text-left">
+                                        <p class="font-bold text-sm text-gray-900 dark:text-white">${theme.name}</p>
+                                        <p class="text-[10px] text-gray-500">Professional Look</p>
                                     </div>
-                                </div>`).join('')}
-                            <button onclick="addNewItem()" class="w-full py-4 border-2 border-dashed border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-800">Add Item <i data-lucide="plus" class="w-5 h-5"></i></button>
+                                    ${state.settings.color === key ? '<i data-lucide="check-circle-2" class="w-6 h-6 text-blue-500 ml-auto"></i>' : ''}
+                                </button>
+                            `).join('')}
                         </div>
-                        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 z-40 flex gap-3 h-[90px] items-start">
-                            <button onclick="setCreateStep(1)" class="px-6 py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-white">Back</button>
-                            <button onclick="setCreateStep(3)" class="flex-1 bg-yellow-600 text-white py-3.5 rounded-xl font-bold shadow-lg flex justify-center items-center gap-2">Preview <i data-lucide="eye" class="w-5 h-5"></i></button>
-                        </div>
-                    </div>`;
-            } else if (step === 3) {
-                 const theme = THEMES[state.settings.invoiceColor];
-                 html = `
-                    <div class="p-4 pb-32 slide-in">
-                        <div class="bg-white shadow-2xl mx-auto max-w-md print:w-full dark:bg-slate-800">
-                             <div class="bg-gradient-to-r ${theme.from} ${theme.to} p-6 text-white">
-                                <h1 class="text-2xl font-bold uppercase">${state.profile.name}</h1>
-                                <p class="opacity-80">${state.profile.phone}</p>
-                             </div>
-                             <div class="p-6 text-gray-800 dark:text-gray-200">
-                                <div class="flex justify-between mb-6">
-                                    <div><p class="text-xs text-gray-400 font-bold uppercase">Bill To</p><h3 class="font-bold text-lg">${state.draft.clientName}</h3></div>
-                                    <div class="text-right"><p class="text-xs text-gray-400 font-bold uppercase">Total Due</p><h3 class="font-bold text-lg ${theme.text}">${formatCurrency(total)}</h3></div>
-                                </div>
-                                <div class="space-y-3 mb-6">
-                                    ${state.draft.items.map(i => `<div class="flex justify-between text-sm border-b dark:border-slate-700 pb-2"><span>${i.name} <span class="text-gray-400">x${i.qty}</span></span><span class="font-bold">${formatCurrency(i.price*i.qty)}</span></div>`).join('')}
-                                </div>
-                                <div class="flex justify-between font-black text-xl border-t-2 border-black dark:border-white pt-4"><span>Total</span><span>${formatCurrency(total)}</span></div>
-                             </div>
-                        </div>
-                        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 z-40 flex gap-3 h-[90px] items-start">
-                            <button onclick="setCreateStep(2)" class="px-6 py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-white">Edit</button>
-                            <button onclick="saveInvoice()" class="flex-1 bg-green-600 text-white py-3.5 rounded-xl font-bold shadow-lg flex justify-center items-center gap-2">Save Invoice <i data-lucide="check" class="w-5 h-5"></i></button>
-                        </div>
-                    </div>`;
-            }
-            container.innerHTML = html;
-            if(step===1) {
-                document.getElementById('inp-client').addEventListener('input', e=>state.draft.clientName=e.target.value);
-                document.getElementById('inp-phone').addEventListener('input', e=>state.draft.clientPhone=e.target.value);
-                document.getElementById('inp-code').addEventListener('input', e=>state.draft.clientCode=e.target.value);
-                document.getElementById('inp-date').addEventListener('input', e=>state.draft.dueDate=e.target.value);
-            }
-            lucide.createIcons();
+                    </div>
+
+                    <div class="bg-white dark:bg-dark-surface rounded-3xl overflow-hidden border border-gray-100 dark:border-dark-border">
+                        <button class="w-full flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-b border-gray-50 dark:border-gray-800">
+                            <span class="font-bold text-sm dark:text-white">Help & Support</span>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <span class="font-bold text-sm dark:text-white">Privacy Policy</span>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </button>
+                    </div>
+                    
+                    <p class="text-center text-[10px] font-bold text-gray-300 dark:text-gray-600 mt-8">Version 3.0.0 Pro • Build 2402</p>
+                </div>
+            `;
         }
 
         function renderHistory(container) {
             container.innerHTML = `
-                <div class="p-5 space-y-4 fade-in pb-20">
-                    <h2 class="text-2xl font-black text-gray-800 dark:text-white">History</h2>
-                    <div class="space-y-3">
-                         ${state.invoices.length ? state.invoices.map(inv => renderInvoiceCard(inv)).join('') : '<p class="text-center text-gray-400 mt-10">No records found</p>'}
+                <div class="p-6 space-y-6 animate-fade-in">
+                    <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+                        <button class="px-5 py-2 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold whitespace-nowrap">All Time</button>
+                        <button class="px-5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-bold whitespace-nowrap">This Month</button>
+                        <button class="px-5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-bold whitespace-nowrap">Unpaid</button>
                     </div>
-                </div>`;
-            lucide.createIcons();
-        }
-
-        function renderSettings(container) {
-             container.innerHTML = `
-                <div class="p-5 space-y-6 fade-in pb-20">
-                     <h2 class="text-2xl font-black text-gray-800 dark:text-white">Settings</h2>
-                     <div class="space-y-2">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Theme</p>
-                        <div class="flex bg-white dark:bg-slate-800 p-1 rounded-xl border border-gray-100 dark:border-slate-700">
-                             <button onclick="updateSetting('appTheme','light')" class="flex-1 py-2 rounded-lg font-bold text-sm ${state.settings.appTheme==='light'?'bg-gray-100 text-gray-800':'text-gray-400'}">Light</button>
-                             <button onclick="updateSetting('appTheme','dark')" class="flex-1 py-2 rounded-lg font-bold text-sm ${state.settings.appTheme==='dark'?'bg-slate-700 text-white':'text-gray-400'}">Dark</button>
-                        </div>
-                     </div>
-                     <div class="space-y-2">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Invoice Color</p>
-                        <div class="grid grid-cols-1 gap-2">
-                             ${Object.entries(THEMES).map(([k,t]) => `
-                                <button onclick="updateSetting('invoiceColor','${k}')" class="flex items-center gap-3 p-3 rounded-xl border ${state.settings.invoiceColor===k ? 'bg-white dark:bg-slate-700 border-blue-500 ring-1 ring-blue-500' : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700'}">
-                                    <div class="w-6 h-6 rounded-full bg-gradient-to-br ${t.from} ${t.to}"></div>
-                                    <span class="font-bold text-sm text-gray-700 dark:text-gray-200">${t.name}</span>
-                                </button>
-                             `).join('')}
-                        </div>
-                     </div>
-                </div>
-             `;
-        }
-
-        function renderProfile(container) {
-            container.innerHTML = `
-                <div class="p-5 space-y-6 fade-in pb-20">
-                    <div class="text-center">
-                        <div class="w-24 h-24 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full mx-auto flex items-center justify-center text-3xl font-black text-white shadow-lg mb-4">
-                            ${state.profile.logoText}
-                        </div>
-                        <h2 class="text-2xl font-black text-gray-800 dark:text-white">${state.profile.name}</h2>
-                    </div>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl space-y-4 shadow-sm border border-gray-100 dark:border-slate-700">
-                        <div><label class="text-xs font-bold text-gray-400">Company Name</label><input oninput="updateProfile('name',this.value)" value="${state.profile.name}" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold dark:text-white outline-none"></div>
-                        <div><label class="text-xs font-bold text-gray-400">Phone</label><input oninput="updateProfile('phone',this.value)" value="${state.profile.phone}" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold dark:text-white outline-none"></div>
-                        <div><label class="text-xs font-bold text-gray-400">Email</label><input oninput="updateProfile('email',this.value)" value="${state.profile.email}" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold dark:text-white outline-none"></div>
-                        <button onclick="saveData(); alert('Saved!')" class="w-full bg-gray-900 dark:bg-white dark:text-slate-900 text-white p-3 rounded-xl font-bold">Save Changes</button>
+                    <div class="space-y-4">
+                        ${state.invoices.length === 0 ? 
+                            `<div class="text-center py-20 opacity-40">
+                                <i data-lucide="scroll" class="w-16 h-16 mx-auto mb-4"></i>
+                                <p class="font-bold">No transactions yet</p>
+                            </div>` : 
+                            state.invoices.map(inv => renderInvoiceCard(inv)).join('')
+                        }
                     </div>
                 </div>
             `;
         }
 
-        // --- 6. LOGIC HANDLERS ---
-        function addNewItem() { state.draft.items.push({ id: Date.now(), name: '', qty: 1, price: 0 }); setCreateStep(2); }
-        function removeItem(id) { state.draft.items = state.draft.items.filter(i => i.id !== id); setCreateStep(2); }
-        function updateItem(id, f, v) { 
-            const i = state.draft.items.find(x => x.id === id); 
-            if(i) { i[f] = v; if(f==='qty') setCreateStep(2); } 
+        function renderCreate(container) {
+            const total = state.draft.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
+            
+            container.innerHTML = `
+                <div class="p-6 space-y-6 animate-slide-up pb-32">
+                    <div class="bg-white dark:bg-dark-surface p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border space-y-4">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Client Details</h3>
+                        <div>
+                            <input type="text" placeholder="Client Name" value="${state.draft.client}" oninput="state.draft.client=this.value" class="w-full text-lg font-bold bg-transparent border-b border-gray-200 dark:border-gray-700 py-2 focus:border-blue-500 outline-none dark:text-white placeholder-gray-300">
+                        </div>
+                        <div class="flex gap-3">
+                            <input type="text" value="${state.draft.code}" oninput="state.draft.code=this.value" class="w-16 font-bold bg-gray-50 dark:bg-gray-800 rounded-xl text-center py-3 dark:text-white">
+                            <input type="tel" placeholder="Phone Number" value="${state.draft.phone}" oninput="state.draft.phone=this.value" class="flex-1 font-bold bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 outline-none dark:text-white">
+                        </div>
+                        <input type="date" value="${state.draft.date}" oninput="state.draft.date=this.value" class="w-full font-bold bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 outline-none dark:text-white text-gray-600">
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end px-2">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Items</h3>
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400">${state.draft.items.length} items</span>
+                        </div>
+                        
+                        ${state.draft.items.map((item, idx) => `
+                            <div class="bg-white dark:bg-dark-surface p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border relative group">
+                                <button onclick="removeItem(${item.id})" class="absolute -right-2 -top-2 bg-red-100 dark:bg-red-900 text-red-500 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </button>
+                                <div class="flex gap-3 mb-3">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-500">
+                                        ${idx + 1}
+                                    </div>
+                                    <input type="text" placeholder="Item Name" value="${item.name}" oninput="updateItem(${item.id}, 'name', this.value)" class="flex-1 font-bold bg-transparent outline-none dark:text-white">
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2">
+                                        <label class="text-[10px] font-bold text-gray-400 uppercase">Price</label>
+                                        <input type="number" value="${item.price}" oninput="updateItem(${item.id}, 'price', this.value)" class="w-full bg-transparent font-bold outline-none dark:text-white">
+                                    </div>
+                                    <div class="w-24 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 flex items-center justify-between">
+                                        <button onclick="updateItem(${item.id}, 'qty', ${Math.max(1, item.qty-1)})" class="text-gray-400 hover:text-gray-600"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                                        <span class="font-bold dark:text-white text-sm">${item.qty}</span>
+                                        <button onclick="updateItem(${item.id}, 'qty', ${item.qty+1})" class="text-blue-500 hover:text-blue-600"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+
+                        <button onclick="addItem()" class="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Item
+                        </button>
+                    </div>
+                </div>
+
+                <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-surface border-t border-gray-100 dark:border-dark-border p-5 pb-8 z-40">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-sm font-bold text-gray-500">Total Amount</span>
+                        <span class="text-2xl font-black text-gray-900 dark:text-white">${formatCurrency(total)}</span>
+                    </div>
+                    <button onclick="saveInvoice()" class="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                        Generate Invoice <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
         }
-        function updateSetting(k, v) { state.settings[k] = v; saveData(); renderSettings(document.getElementById('app-content')); }
-        function updateProfile(f, v) { state.profile[f] = v; }
-        
+
+        function renderDetail(container, id) {
+            const inv = state.invoices.find(i => i.id === id);
+            if (!inv) return navigateTo('home');
+            
+            const theme = THEMES[state.settings.color];
+            const balance = inv.total - inv.paid;
+
+            container.innerHTML = `
+                <div class="p-6 space-y-6 animate-slide-up pb-32">
+                    <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-dark-border text-center">
+                        <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-500 mb-4 inline-block">${inv.id}</span>
+                        <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-1">${formatCurrency(inv.total)}</h2>
+                        <p class="text-sm font-bold ${balance <= 0 ? 'text-green-500' : 'text-orange-500'}">${balance <= 0 ? 'Paid in Full' : 'Pending Payment'}</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mt-8">
+                            <button onclick="openPaymentSheet('${inv.id}')" ${balance <= 0 ? 'disabled class="opacity-50 cursor-not-allowed py-3 rounded-2xl bg-gray-100 font-bold text-gray-400"' : 'class="py-3 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-black font-bold shadow-lg active:scale-95 transition-transform"'} >Record Pay</button>
+                            <a href="https://wa.me/${inv.code.replace('+','')}${inv.phone}?text=Invoice ${inv.id}" target="_blank" class="py-3 rounded-2xl bg-green-500 text-white font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i> Remind
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="invoice-preview-container" class="bg-white shadow-xl mx-auto max-w-sm overflow-hidden">
+                        <div class="bg-gradient-to-br ${theme.from} ${theme.to} p-6 text-white relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl"></div>
+                            <h1 class="text-xl font-bold uppercase tracking-widest mb-1">${state.profile.name}</h1>
+                            <p class="text-xs opacity-80">${state.profile.email}</p>
+                            <div class="mt-6 flex justify-between items-end">
+                                <div>
+                                    <p class="text-[10px] opacity-70 uppercase tracking-widest font-bold">Billed To</p>
+                                    <p class="font-bold text-lg">${inv.client}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] opacity-70 uppercase tracking-widest font-bold">Due Date</p>
+                                    <p class="font-bold">${inv.date}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 min-h-[100px]">
+                                ${inv.items.map(i => `
+                                    <div class="flex justify-between text-sm py-2 border-b border-dashed border-gray-100">
+                                        <div>
+                                            <span class="font-bold text-gray-800">${i.name}</span>
+                                            <span class="text-gray-400 text-xs ml-1">x${i.qty}</span>
+                                        </div>
+                                        <span class="font-bold text-gray-800">${formatCurrency(i.price * i.qty)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="mt-6 pt-4 border-t-2 border-gray-900 flex justify-between items-center">
+                                <span class="font-black text-gray-900 uppercase">Total</span>
+                                <span class="font-black text-2xl text-gray-900">${formatCurrency(inv.total)}</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 text-center">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Thank you for your business</p>
+                        </div>
+                    </div>
+                    
+                    <button onclick="window.print()" class="w-full py-4 text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors">Download / Print PDF</button>
+                </div>
+            `;
+        }
+
+        function addItem() {
+            state.draft.items.push({ id: Date.now(), name: '', price: '', qty: 1 });
+            renderCreate(document.getElementById('app-content'));
+        }
+
+        function removeItem(id) {
+            state.draft.items = state.draft.items.filter(i => i.id !== id);
+            renderCreate(document.getElementById('app-content'));
+        }
+
+        function updateItem(id, field, val) {
+            const item = state.draft.items.find(i => i.id === id);
+            if (item) {
+                item[field] = val;
+                if (field === 'qty' || field === 'price') renderCreate(document.getElementById('app-content'));
+            }
+        }
+
         function saveInvoice() {
-            const total = state.draft.items.reduce((s, i) => s + (i.qty * i.price), 0);
-            const id = `INV-${String(state.invoices.length + 1).padStart(3,'0')}`;
-            state.invoices.unshift({
-                id,
-                client: state.draft.clientName,
-                clientPhone: state.draft.clientPhone,
-                clientCode: state.draft.clientCode,
-                date: new Date().toISOString(),
-                dueDate: state.draft.dueDate,
-                total,
-                paid: 0,
-                balance: total,
-                items: [...state.draft.items]
-            });
-            saveData();
+            if (!state.draft.client || !state.draft.items.some(i => i.name && i.price)) {
+                alert('Please fill in client details and at least one item');
+                return;
+            }
+            const total = state.draft.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
+            const inv = {
+                id: `INV-${String(state.invoices.length + 1).padStart(3, '0')}`,
+                client: state.draft.client,
+                phone: state.draft.phone,
+                code: state.draft.code,
+                date: state.draft.date,
+                items: state.draft.items,
+                total: total,
+                paid: 0
+            };
+            state.invoices.unshift(inv);
+            saveState();
             navigateTo('history');
         }
 
-        function editInvoice(id) {
-            const inv = state.invoices.find(i => i.id === id);
-            if(inv) {
-                state.draft = {
-                    clientName: inv.client, clientPhone: inv.clientPhone, clientCode: inv.clientCode || '+91',
-                    dueDate: inv.dueDate, items: [...inv.items]
-                };
-                // Remove old, we will save as new or update? 
-                // Simple implementation: Delete old and start create flow to replace it
-                state.invoices = state.invoices.filter(i => i.id !== id);
-                navigateTo('create');
-            }
+        function openActionSheet() {
+            document.getElementById('backdrop').classList.remove('hidden');
+            setTimeout(() => document.getElementById('backdrop').classList.remove('opacity-0'), 10);
+            document.getElementById('action-sheet').classList.add('active');
         }
 
-        // --- PAYMENT MODAL LOGIC ---
-        let currentInvId = null;
-        function openPaymentModal(id) {
+        function openPaymentSheet(id) {
             currentInvId = id;
-            const modal = document.getElementById('modal-overlay');
-            const content = document.getElementById('modal-content');
             const inv = state.invoices.find(i => i.id === id);
+            document.getElementById('pay-sheet-subtitle').innerText = `${inv.client} • ${formatCurrency(inv.total - inv.paid)} Due`;
+            document.getElementById('payment-amount').value = inv.total - inv.paid;
             
-            content.innerHTML = `
-                <h3 class="text-xl font-black text-gray-800 dark:text-white mb-2">Record Payment</h3>
-                <p class="text-sm text-gray-500 mb-4">Balance Due: ${formatCurrency(inv.balance)}</p>
-                <input type="number" id="pay-amount" placeholder="Enter Amount" class="w-full p-4 bg-gray-50 dark:bg-slate-900 rounded-xl font-bold text-xl mb-4 dark:text-white outline-none focus:ring-2 ring-yellow-500">
-                <div class="flex gap-3">
-                    <button onclick="closeModal()" class="flex-1 py-3 font-bold text-gray-500 dark:text-gray-400">Cancel</button>
-                    <button onclick="submitPayment()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg">Confirm</button>
-                </div>
-            `;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('backdrop').classList.remove('hidden');
+            setTimeout(() => document.getElementById('backdrop').classList.remove('opacity-0'), 10);
+            document.getElementById('payment-sheet').classList.add('active');
         }
 
-        function closeModal() {
-            const modal = document.getElementById('modal-overlay');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+        function closeAllSheets() {
+            document.getElementById('backdrop').classList.add('opacity-0');
+            document.querySelectorAll('.gpay-sheet').forEach(el => el.classList.remove('active'));
+            setTimeout(() => document.getElementById('backdrop').classList.add('hidden'), 300);
         }
 
-        function submitPayment() {
-            const amt = Number(document.getElementById('pay-amount').value);
-            if (!amt || amt <= 0) return alert('Invalid Amount');
-            
-            const inv = state.invoices.find(i => i.id === currentInvId);
-            if (inv) {
-                if(amt > inv.balance) return alert('Amount exceeds balance');
-                inv.paid += amt;
-                inv.balance -= amt;
-                saveData();
-                closeModal();
-                navigateTo('invoice-detail', currentInvId);
+        function confirmPayment() {
+            const amount = Number(document.getElementById('payment-amount').value);
+            if (amount > 0 && currentInvId) {
+                const inv = state.invoices.find(i => i.id === currentInvId);
+                inv.paid += amount;
+                if (inv.paid > inv.total) inv.paid = inv.total;
+                saveState();
+                closeAllSheets();
+                navigateTo('home'); 
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', initApp);
+        function setThemeColor(color) {
+            state.settings.color = color;
+            saveState();
+            renderSettings(document.getElementById('app-content'));
+        }
+        
+        function setPaymentMode(mode) {
+             document.querySelectorAll('.pay-mode-btn').forEach(btn => btn.classList.remove('bg-gray-100', 'border-gray-400'));
+             event.currentTarget.classList.add('bg-gray-100', 'dark:bg-gray-700', 'border-gray-400');
+        }
 
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
