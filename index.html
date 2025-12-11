@@ -2,623 +2,703 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Invoice Generator Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Invoice Pro Ultimate</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        dark: {
+                            bg: '#0f172a',
+                            surface: '#1e293b',
+                            border: '#334155',
+                            text: '#f1f5f9',
+                            muted: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Custom Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
+        /* --- CORE STYLES --- */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
             -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Hide Scrollbar but allow scrolling */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+        /* --- DARK MODE OVERRIDES --- */
+        .dark body { background-color: #0f172a; color: #f1f5f9; }
+        .dark .bg-white { background-color: #1e293b !important; color: #f1f5f9; border-color: #334155; }
+        .dark .bg-gray-50 { background-color: #0f172a !important; }
+        .dark .bg-gray-100 { background-color: #334155 !important; color: #f1f5f9; }
+        .dark .text-gray-900, .dark .text-gray-800 { color: #f8fafc !important; }
+        .dark .text-gray-700 { color: #e2e8f0 !important; }
+        .dark .text-gray-600, .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .text-gray-400 { color: #64748b !important; }
+        .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300 { border-color: #334155 !important; }
+        .dark input, .dark select, .dark textarea { 
+            background-color: #334155 !important; 
+            color: white !important; 
+            border-color: #475569 !important; 
         }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .dark input::placeholder { color: #64748b; }
+        
+        /* --- UTILITIES --- */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Smooth Transitions */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        .slide-in {
-            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        /* --- ANIMATIONS --- */
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* PRINT STYLES - CRITICAL FOR PDF */
+        /* --- PRINT STYLES --- */
         @media print {
-            @page {
-                margin: 0;
-                size: auto;
-            }
-            body {
-                background: white;
-            }
-            /* Hide everything that isn't the invoice preview */
-            body * {
-                visibility: hidden;
-            }
+            @page { margin: 0; size: auto; }
+            body { background: white !important; color: black !important; }
+            body * { visibility: hidden; }
             #invoice-preview-container, #invoice-preview-container * {
                 visibility: visible;
+                color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
             }
             #invoice-preview-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-                border: none !important;
-                box-shadow: none !important;
+                position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0;
                 background: white !important;
-            }
-            /* Force background colors to print */
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
+                box-shadow: none !important;
             }
         }
     </style>
 </head>
-<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden">
+<body class="bg-gray-100 h-[100dvh] w-full flex justify-center overflow-hidden text-gray-800">
 
-    <!-- Mobile App Container -->
-    <div class="w-full max-w-md h-full bg-white sm:shadow-2xl sm:rounded-none relative flex flex-col overflow-hidden">
+    <!-- APP CONTAINER -->
+    <div id="app-root" class="w-full h-full bg-white relative flex flex-col overflow-hidden max-w-lg mx-auto shadow-2xl transition-colors duration-300">
         
-        <!-- TOP BAR -->
-        <div id="top-bar" class="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-20 border-b border-gray-100">
-            <div class="flex items-center gap-3">
-                <button id="back-btn" class="hidden p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
-                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                </button>
-                <h1 id="page-title" class="text-lg font-bold text-gray-800">Invoice Pro</h1>
-            </div>
-            <div class="flex gap-2">
-                <button class="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                    <i data-lucide="search" class="w-5 h-5"></i>
-                </button>
-                <button class="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                    <i data-lucide="more-vertical" class="w-5 h-5"></i>
+        <!-- ONBOARDING OVERLAY (SHOWN IF NO PROFILE) -->
+        <div id="onboarding-screen" class="absolute inset-0 z-50 bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700 hidden flex-col items-center justify-center p-8 text-white">
+            <div class="w-full max-w-sm space-y-8 scale-in">
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-md border border-white/30 shadow-2xl">
+                        <i data-lucide="trending-up" class="w-12 h-12 text-white"></i>
+                    </div>
+                    <h1 class="text-3xl font-black mb-2 leading-tight">Start Increasing Your <br/>Business Growth</h1>
+                    <p class="text-yellow-100 font-medium">Professional Invoicing for Pros.</p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 space-y-4 shadow-xl">
+                    <div>
+                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-wider">Company Name</label>
+                        <input id="ob-name" type="text" placeholder="e.g. Alpha Solutions" class="w-full bg-white/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-wider">Mobile Number</label>
+                        <div class="flex gap-2">
+                             <input id="ob-code" type="text" value="+91" class="w-16 bg-white/20 border border-white/10 rounded-xl p-3 text-white text-center font-bold">
+                             <input id="ob-phone" type="tel" placeholder="98765 43210" class="flex-1 bg-white/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-yellow-100 ml-1 uppercase tracking-wider">Email</label>
+                        <input id="ob-email" type="email" placeholder="business@example.com" class="w-full bg-white/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 font-bold">
+                    </div>
+                </div>
+
+                <button onclick="completeOnboarding()" class="w-full bg-white text-yellow-700 p-4 rounded-xl font-black text-lg shadow-lg shadow-black/20 hover:bg-yellow-50 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    Get Started <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
 
-        <!-- MAIN CONTENT AREA -->
-        <div id="app-content" class="flex-1 overflow-y-auto scrollbar-hide pb-24 relative bg-gray-50">
-            <!-- Content is injected here by JS -->
+        <!-- HEADER -->
+        <div id="top-bar" class="bg-white/90 backdrop-blur-md px-5 py-4 flex items-center justify-between sticky top-0 z-30 border-b border-gray-100 transition-colors duration-300">
+            <div class="flex items-center gap-3 w-full overflow-hidden">
+                <button id="back-btn" class="hidden p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors active:scale-95">
+                    <i data-lucide="arrow-left" class="w-6 h-6 text-gray-700 dark:text-gray-200"></i>
+                </button>
+                <div class="flex flex-col overflow-hidden min-w-0">
+                    <h1 id="page-title" class="text-xl font-bold text-gray-900 tracking-tight text-truncate">Invoice Pro</h1>
+                    <span id="page-subtitle" class="text-[10px] text-gray-500 font-medium hidden text-truncate">Dashboard</span>
+                </div>
+            </div>
+            <div id="header-actions" class="flex gap-2 flex-shrink-0"></div>
+        </div>
+
+        <!-- SCROLLABLE CONTENT AREA -->
+        <div id="app-content" class="flex-1 overflow-y-auto scrollbar-hide pb-28 relative bg-gray-50 transition-colors duration-300">
+            <!-- Dynamic Content Injected Here -->
         </div>
 
         <!-- BOTTOM NAVIGATION -->
-        <div id="bottom-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 pb-6 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-20">
-            <button onclick="navigateTo('home')" class="nav-btn flex flex-col items-center gap-1 text-blue-600 transition-colors" data-tab="home">
-                <i data-lucide="home" class="w-6 h-6"></i>
-                <span class="text-[10px] font-medium">Home</span>
-            </button>
-            <button onclick="navigateTo('history')" class="nav-btn flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors" data-tab="history">
-                <i data-lucide="file-text" class="w-6 h-6"></i>
-                <span class="text-[10px] font-medium">History</span>
+        <div id="bottom-nav" class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-2 pb-safe flex justify-between items-end shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-30 h-[85px] transition-colors duration-300">
+            <button onclick="navigateTo('home')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="home">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold tracking-wide">Home</span>
             </button>
             
-            <div class="relative -top-8">
-                <button onclick="navigateTo('create')" class="bg-blue-600 text-white p-4 rounded-2xl shadow-lg shadow-blue-300 transform transition-transform active:scale-95 flex items-center justify-center border-4 border-gray-50 hover:bg-blue-700">
-                    <i data-lucide="plus" class="w-7 h-7 stroke-[2.5]"></i>
+            <button onclick="navigateTo('history')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="history">
+                <i data-lucide="file-clock" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold tracking-wide">History</span>
+            </button>
+            
+            <!-- Floating Action Button -->
+            <div class="relative -top-8 group z-40">
+                <div class="absolute inset-0 bg-blue-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <button onclick="navigateTo('create')" class="relative bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-16 h-16 rounded-2xl shadow-xl shadow-blue-300/50 transform transition-all active:scale-90 flex items-center justify-center border-4 border-white dark:border-slate-800">
+                    <i data-lucide="plus" class="w-8 h-8 stroke-[3]"></i>
                 </button>
             </div>
 
-            <button onclick="navigateTo('profile')" class="nav-btn flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors" data-tab="profile">
-                <i data-lucide="user" class="w-6 h-6"></i>
-                <span class="text-[10px] font-medium">Profile</span>
+            <button onclick="navigateTo('profile')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="profile">
+                <i data-lucide="user-square" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold tracking-wide">Profile</span>
             </button>
-            <button class="nav-btn flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600 transition-colors" data-tab="settings">
-                <i data-lucide="settings" class="w-6 h-6"></i>
-                <span class="text-[10px] font-medium">Settings</span>
+            
+            <button onclick="navigateTo('settings')" class="nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3" data-tab="settings">
+                <i data-lucide="settings-2" class="w-6 h-6"></i>
+                <span class="text-[10px] font-bold tracking-wide">Settings</span>
             </button>
+        </div>
+
+        <!-- MODAL CONTAINER (For Payments etc) -->
+        <div id="modal-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
+            <div id="modal-content" class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl slide-up">
+                <!-- Injected via JS -->
+            </div>
         </div>
 
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- State Management ---
-        const DEFAULT_PROFILE = {
-            name: 'SHRIDHAR GROUP OF COMPANY',
-            phone: '+91 74836 40694',
-            email: 'shridhargroupofcompany2024@gmail.com',
-            address: 'Bangalore, Karnataka, India',
-            logoText: 'SG'
+        // --- 1. STATE & CONSTANTS ---
+        const DEFAULT_PROFILE = { name: '', phone: '', email: '', logoText: '', code: '+91', isSetup: false };
+        const THEMES = {
+            'blue': { name: 'Professional Blue', from: 'from-blue-600', to: 'to-indigo-700', text: 'text-blue-600' },
+            'gold': { name: 'Premium Gold', from: 'from-yellow-600', to: 'to-yellow-500', text: 'text-yellow-600' },
+            'black': { name: 'Minimal Black', from: 'from-gray-900', to: 'to-black', text: 'text-gray-900' },
+            'green': { name: 'Corporate Green', from: 'from-emerald-600', to: 'to-teal-700', text: 'text-emerald-600' },
+            'purple': { name: 'Creative Purple', from: 'from-purple-600', to: 'to-fuchsia-700', text: 'text-purple-600' }
         };
 
         let state = {
             tab: 'home',
             step: 1,
-            invoices: JSON.parse(localStorage.getItem('invoices')) || [
-                { id: 'INV-001', client: 'Tech Solutions Ltd', date: '2025-10-24', amount: 45000, status: 'Paid', items: [] },
-                { id: 'INV-002', client: 'Creative Studios', date: '2025-10-26', amount: 12500, status: 'Pending', items: [] }
-            ],
-            profile: JSON.parse(localStorage.getItem('profile')) || DEFAULT_PROFILE,
-            draft: {
-                clientName: '',
-                items: [{ id: Date.now(), name: '', qty: 1, price: 0 }]
-            }
+            invoices: JSON.parse(localStorage.getItem('invoices_pro')) || [],
+            profile: JSON.parse(localStorage.getItem('profile_pro')) || DEFAULT_PROFILE,
+            settings: JSON.parse(localStorage.getItem('settings_pro')) || { appTheme: 'light', invoiceColor: 'gold' },
+            draft: resetDraft()
         };
 
-        // --- Core Functions ---
+        function resetDraft() {
+            return {
+                clientName: '', clientPhone: '', clientCode: '+91',
+                dueDate: new Date().toISOString().split('T')[0],
+                items: [{ id: Date.now(), name: '', qty: 1, price: 0 }]
+            };
+        }
 
+        // --- 2. CORE UTILITIES ---
         function saveData() {
-            localStorage.setItem('invoices', JSON.stringify(state.invoices));
-            localStorage.setItem('profile', JSON.stringify(state.profile));
+            localStorage.setItem('invoices_pro', JSON.stringify(state.invoices));
+            localStorage.setItem('profile_pro', JSON.stringify(state.profile));
+            localStorage.setItem('settings_pro', JSON.stringify(state.settings));
+            applyAppTheme();
         }
 
-        function formatCurrency(amount) {
-            return '₹' + Number(amount).toLocaleString('en-IN');
+        function applyAppTheme() {
+            const root = document.documentElement;
+            if (state.settings.appTheme === 'dark') root.classList.add('dark');
+            else root.classList.remove('dark');
         }
 
-        function navigateTo(tab) {
+        function formatCurrency(amount) { return '₹' + Number(amount).toLocaleString('en-IN'); }
+        function formatDate(d) { return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+        
+        function getStatus(inv) {
+            if (inv.balance <= 0) return 'Paid';
+            if (inv.paid > 0) return 'Partial';
+            return 'Pending';
+        }
+
+        function initApp() {
+            applyAppTheme();
+            if (!state.profile.isSetup) {
+                document.getElementById('onboarding-screen').classList.remove('hidden');
+                document.getElementById('onboarding-screen').classList.add('flex');
+            } else {
+                navigateTo('home');
+            }
+        }
+
+        // --- 3. ONBOARDING ---
+        function completeOnboarding() {
+            const name = document.getElementById('ob-name').value;
+            const phone = document.getElementById('ob-phone').value;
+            const code = document.getElementById('ob-code').value;
+            const email = document.getElementById('ob-email').value;
+
+            if (!name || !phone) { alert('Please fill in Company Name and Phone.'); return; }
+
+            state.profile = { 
+                name, phone, email, code, 
+                logoText: name.substring(0,2).toUpperCase(), 
+                isSetup: true 
+            };
+            saveData();
+            
+            // Animate out
+            const screen = document.getElementById('onboarding-screen');
+            screen.style.opacity = '0';
+            screen.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                screen.classList.add('hidden');
+                navigateTo('home');
+            }, 500);
+        }
+
+        // --- 4. NAVIGATION ---
+        function navigateTo(tab, data = null) {
             state.tab = tab;
             
-            // Update UI State
+            // Tab Styles
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 const isActive = btn.dataset.tab === tab;
-                btn.className = `nav-btn flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`;
+                btn.className = `nav-btn w-16 group flex flex-col items-center gap-1.5 pb-3 transition-colors ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600'}`;
             });
 
-            // Update Top Bar
-            const titleMap = {
-                'home': 'Invoice Pro',
-                'create': 'New Invoice',
-                'history': 'History',
-                'profile': 'Profile'
-            };
-            document.getElementById('page-title').innerText = titleMap[tab] || 'Invoice Pro';
-            
+            // Header Logic
+            const title = document.getElementById('page-title');
+            const sub = document.getElementById('page-subtitle');
             const backBtn = document.getElementById('back-btn');
+
             if (tab === 'home') {
+                title.innerText = state.profile.name || 'Invoice Pro';
+                sub.innerText = 'Business Dashboard';
+                sub.classList.remove('hidden');
                 backBtn.classList.add('hidden');
+            } else if (tab === 'invoice-detail') {
+                 title.innerText = 'Invoice Details';
+                 sub.classList.add('hidden');
+                 backBtn.classList.remove('hidden');
+                 backBtn.onclick = () => navigateTo('history');
             } else {
+                title.innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
+                if(tab === 'create') title.innerText = 'New Invoice';
+                sub.classList.add('hidden');
                 backBtn.classList.remove('hidden');
                 backBtn.onclick = () => {
-                    if (tab === 'create' && state.step > 1) {
-                        setCreateStep(state.step - 1);
-                    } else {
-                        navigateTo('home');
-                    }
+                    if (tab === 'create' && state.step > 1) setCreateStep(state.step - 1);
+                    else navigateTo('home');
                 };
             }
 
-            // Render Content
+            // Render
             const content = document.getElementById('app-content');
             content.innerHTML = '';
             
             if (tab === 'home') renderHome(content);
-            else if (tab === 'create') {
-                state.step = 1; // Reset step on new entry
-                state.draft = { clientName: '', items: [{ id: Date.now(), name: '', qty: 1, price: 0 }] }; // Reset draft
-                renderCreate(content);
-            }
+            else if (tab === 'create') { state.step = 1; state.draft = resetDraft(); if(data) state.draft=data; renderCreate(content); }
             else if (tab === 'history') renderHistory(content);
             else if (tab === 'profile') renderProfile(content);
+            else if (tab === 'settings') renderSettings(content);
+            else if (tab === 'invoice-detail' && data) renderInvoiceDetail(content, data);
 
             lucide.createIcons();
         }
 
-        // --- Renderers ---
+        // --- 5. RENDERERS ---
 
         function renderHome(container) {
-            const totalRevenue = state.invoices.reduce((sum, inv) => sum + inv.amount, 0);
-            
+            const totalRev = state.invoices.reduce((sum, i) => sum + (i.paid || 0), 0);
+            const totalPending = state.invoices.reduce((sum, i) => sum + (i.balance || 0), 0);
+
             container.innerHTML = `
-                <div class="p-4 space-y-6 fade-in">
-                    <!-- Hero Card -->
-                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-lg shadow-blue-200 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-10 -mb-10"></div>
-                        
-                        <p class="text-blue-100 text-sm font-medium mb-1">Total Revenue</p>
-                        <h2 class="text-3xl font-bold mb-6">${formatCurrency(totalRevenue)}</h2>
-                        
-                        <div class="flex gap-3">
-                            <button onclick="navigateTo('create')" class="flex-1 bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> New Invoice
-                            </button>
-                            <button class="flex-1 bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
-                                <i data-lucide="file-text" class="w-4 h-4"></i> Reports
-                            </button>
+                <div class="p-5 space-y-6 fade-in pb-20">
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="col-span-2 bg-gradient-to-br from-yellow-600 to-yellow-500 rounded-3xl p-6 text-white shadow-lg shadow-yellow-200/50 dark:shadow-none relative overflow-hidden">
+                            <div class="relative z-10">
+                                <p class="text-yellow-100 text-xs font-bold uppercase tracking-widest mb-1">Total Collected</p>
+                                <h2 class="text-4xl font-black tracking-tighter">${formatCurrency(totalRev)}</h2>
+                            </div>
+                            <i data-lucide="wallet" class="absolute bottom-4 right-4 w-16 h-16 text-white/10"></i>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Pending</p>
+                            <h3 class="text-xl font-black text-gray-800 dark:text-gray-100">${formatCurrency(totalPending)}</h3>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-700">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Invoices</p>
+                            <h3 class="text-xl font-black text-gray-800 dark:text-gray-100">${state.invoices.length}</h3>
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
+                    <!-- Recent -->
                     <div>
-                        <h3 class="text-gray-800 font-bold mb-4 text-sm uppercase tracking-wider opacity-70">Quick Actions</h3>
-                        <div class="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-                            ${['Add Client', 'Scan Bill', 'Estimate', 'Products'].map((action, i) => `
-                                <div class="flex flex-col items-center gap-2 min-w-[72px]">
-                                    <div class="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm border border-blue-100">
-                                        <i data-lucide="${i===0?'user':i===1?'camera':i===2?'file-text':'package'}" class="w-6 h-6"></i>
-                                    </div>
-                                    <span class="text-xs font-medium text-gray-600 text-center leading-tight">${action}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-gray-800 font-bold text-sm uppercase tracking-wider opacity-70">Recent Invoices</h3>
-                            <button onclick="navigateTo('history')" class="text-blue-600 text-sm font-medium hover:bg-blue-50 px-2 py-1 rounded-lg">View All</button>
-                        </div>
-                        
+                        <h3 class="text-gray-800 dark:text-gray-200 font-bold text-sm uppercase tracking-wider mb-3 px-1">Recent Invoices</h3>
                         <div class="space-y-3">
-                            ${state.invoices.length === 0 ? '<p class="text-gray-400 text-center py-4">No invoices yet.</p>' : state.invoices.map(inv => `
-                                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm ${inv.status === 'Paid' ? 'bg-green-500' : 'bg-orange-400'}">
-                                            ${inv.client.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold text-gray-800">${inv.client}</h4>
-                                            <p class="text-xs text-gray-500">${inv.date} • ${inv.id}</p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="block font-bold text-gray-800">${formatCurrency(inv.amount)}</span>
-                                        <span class="text-xs font-medium px-2 py-0.5 rounded-full ${inv.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
-                                            ${inv.status}
-                                        </span>
-                                    </div>
+                            ${state.invoices.length === 0 ? `
+                                <div class="text-center py-10 opacity-50">
+                                    <p class="text-sm font-medium">No invoices yet</p>
                                 </div>
-                            `).join('')}
+                            ` : state.invoices.slice(0, 5).map(inv => renderInvoiceCard(inv)).join('')}
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        function renderCreate(container) {
-            // Re-render handled by setCreateStep, initially call step 1 logic
-            setCreateStep(state.step);
+        function renderInvoiceCard(inv) {
+            const status = getStatus(inv);
+            const statusColors = {
+                'Paid': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                'Partial': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                'Pending': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+            };
+
+            return `
+                <div onclick="navigateTo('invoice-detail', '${inv.id}')" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col gap-3 active:scale-[0.98] transition-transform cursor-pointer">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm bg-gray-900 dark:bg-slate-600">
+                                ${inv.client.substring(0,1).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 dark:text-gray-100 text-sm">${inv.client}</h4>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400">#${inv.id} • ${formatDate(inv.date)}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="block font-bold text-gray-900 dark:text-white text-base">${formatCurrency(inv.total)}</span>
+                            ${inv.balance > 0 ? `<span class="text-[10px] text-red-500 font-bold">Bal: ${formatCurrency(inv.balance)}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-50 dark:border-slate-700 mt-1">
+                        <span class="${statusColors[status]} text-[10px] font-bold px-2.5 py-1 rounded-lg">${status}</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 dark:text-slate-600"></i>
+                    </div>
+                </div>
+            `;
         }
+
+        function renderInvoiceDetail(container, invId) {
+            const inv = state.invoices.find(i => i.id === invId);
+            if (!inv) return;
+            const status = getStatus(inv);
+            const theme = THEMES[state.settings.invoiceColor];
+
+            container.innerHTML = `
+                <div class="p-5 pb-32 fade-in space-y-6">
+                    <!-- Status Card -->
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-gray-400 font-bold uppercase">Status</p>
+                            <h2 class="text-2xl font-black ${status === 'Paid' ? 'text-green-500' : 'text-orange-500'}">${status}</h2>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400 font-bold uppercase">Balance Due</p>
+                            <h2 class="text-2xl font-black text-gray-800 dark:text-white">${formatCurrency(inv.balance)}</h2>
+                        </div>
+                    </div>
+
+                    <!-- Payment Actions -->
+                    ${inv.balance > 0 ? `
+                    <div class="flex gap-3">
+                        <button onclick="openPaymentModal('${inv.id}')" class="flex-1 bg-gray-900 dark:bg-white dark:text-slate-900 text-white py-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
+                            <i data-lucide="credit-card" class="w-4 h-4"></i> Record Payment
+                        </button>
+                        <a href="https://wa.me/${(inv.clientCode+inv.clientPhone).replace(/\D/g,'')}?text=Invoice%20${inv.id}%20Pending:%20${formatCurrency(inv.balance)}" target="_blank" class="flex-1 bg-green-500 text-white py-3.5 rounded-xl font-bold shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
+                            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+                        </a>
+                    </div>` : ''}
+
+                    <!-- Invoice Preview (Mini) -->
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-none mx-auto border border-gray-100 dark:border-slate-700 max-w-sm overflow-hidden">
+                        <div class="bg-gradient-to-r ${theme.from} ${theme.to} p-6 text-white">
+                            <div class="flex justify-between items-start">
+                                <h2 class="font-bold text-lg">${state.profile.name}</h2>
+                                <span class="opacity-80 font-mono">${inv.id}</span>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">Client</span>
+                                <span class="font-bold dark:text-gray-200">${inv.client}</span>
+                            </div>
+                            <div class="space-y-2 pt-2 border-t dark:border-slate-700">
+                                ${inv.items.map(i => `
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600 dark:text-gray-400">${i.name} x${i.qty}</span>
+                                        <span class="font-bold dark:text-gray-200">${formatCurrency(i.price * i.qty)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="pt-4 border-t-2 border-dashed dark:border-slate-700 flex justify-between items-center">
+                                <span class="font-bold text-gray-500">Total</span>
+                                <span class="text-xl font-black ${theme.text}">${formatCurrency(inv.total)}</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-green-600 font-bold">
+                                <span>Paid</span>
+                                <span>${formatCurrency(inv.paid)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Actions -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="alert('PDF Download feature simulates opening a print dialog.'); window.print()" class="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-3 rounded-xl font-bold">Download PDF</button>
+                        <button onclick="editInvoice('${inv.id}')" class="bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-3 rounded-xl font-bold">Edit Invoice</button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderCreate(container) { setCreateStep(state.step); }
 
         function setCreateStep(step) {
             state.step = step;
             const container = document.getElementById('app-content');
-            
-            // Calculate total for display
             const total = state.draft.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
-
+            
+            let html = '';
             if (step === 1) {
-                container.innerHTML = `
-                    <div class="p-4 space-y-6 slide-in">
-                         <!-- Stepper -->
-                         <div class="flex items-center justify-center gap-2 mb-4">
-                            <div class="h-2 rounded-full flex-1 bg-blue-600"></div>
-                            <div class="h-2 rounded-full flex-1 bg-gray-200"></div>
-                            <div class="h-2 rounded-full flex-1 bg-gray-200"></div>
+                html = `
+                    <div class="p-5 space-y-6 slide-in">
+                        <div class="flex gap-2"><div class="h-1 bg-yellow-500 flex-1 rounded"></div><div class="h-1 bg-gray-200 dark:bg-slate-700 flex-1 rounded"></div><div class="h-1 bg-gray-200 dark:bg-slate-700 flex-1 rounded"></div></div>
+                        <h2 class="text-2xl font-black text-gray-800 dark:text-white">Client Details</h2>
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 space-y-4">
+                            <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Client Name</label><input type="text" id="inp-client" value="${state.draft.clientName}" class="w-full p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 border-2 border-transparent focus:border-yellow-500 outline-none font-bold text-gray-800 dark:text-white"></div>
+                            <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Phone</label><div class="flex gap-2"><input id="inp-code" value="${state.draft.clientCode}" class="w-16 p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold text-center dark:text-white"><input type="tel" id="inp-phone" value="${state.draft.clientPhone}" class="flex-1 p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 border-2 border-transparent focus:border-yellow-500 outline-none font-bold text-gray-800 dark:text-white"></div></div>
+                            <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">Due Date</label><input type="date" id="inp-date" value="${state.draft.dueDate}" class="w-full p-3.5 rounded-xl bg-gray-50 dark:bg-slate-900 border-2 border-transparent focus:border-yellow-500 outline-none font-bold text-gray-800 dark:text-white"></div>
                         </div>
-
-                        <h2 class="text-xl font-bold text-gray-800">Who is this invoice for?</h2>
-                        
-                        <div class="space-y-4">
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-medium text-gray-600 ml-1">Client Name</label>
-                                <input type="text" id="client-input" value="${state.draft.clientName}" placeholder="e.g. Acme Corp" class="w-full p-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                            </div>
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-medium text-gray-600 ml-1">Client Email (Optional)</label>
-                                <input type="email" placeholder="client@email.com" class="w-full p-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                            </div>
+                        <button onclick="setCreateStep(2)" class="w-full bg-yellow-600 text-white p-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">Next <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+                    </div>`;
+            } else if (step === 2) {
+                html = `
+                    <div class="p-5 pb-32 slide-in min-h-full flex flex-col">
+                        <div class="flex gap-2 mb-4"><div class="h-1 bg-yellow-500 flex-1 rounded"></div><div class="h-1 bg-yellow-500 flex-1 rounded"></div><div class="h-1 bg-gray-200 dark:bg-slate-700 flex-1 rounded"></div></div>
+                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 sticky top-0 z-10 flex justify-between items-center mb-4">
+                             <div><span class="text-xs font-bold text-gray-400 uppercase">Total Bill</span><div class="text-2xl font-black text-yellow-600">${formatCurrency(total)}</div></div>
                         </div>
-                        
-                        <div class="pt-4">
-                            <button onclick="handleStep1Next()" class="w-full bg-blue-600 text-white px-4 py-3 rounded-xl font-medium shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                Next: Add Items <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                // Re-bind input
-                document.getElementById('client-input').addEventListener('input', (e) => state.draft.clientName = e.target.value);
-            } 
-            else if (step === 2) {
-                container.innerHTML = `
-                    <div class="p-4 space-y-4 slide-in">
-                        <!-- Stepper -->
-                         <div class="flex items-center justify-center gap-2 mb-4">
-                            <div class="h-2 rounded-full flex-1 bg-blue-600"></div>
-                            <div class="h-2 rounded-full flex-1 bg-blue-600"></div>
-                            <div class="h-2 rounded-full flex-1 bg-gray-200"></div>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                             <h2 class="text-xl font-bold text-gray-800">Add Items</h2>
-                             <span class="text-sm font-bold text-blue-600">Total: ${formatCurrency(total)}</span>
-                        </div>
-
-                        <div id="items-list" class="space-y-3">
+                        <div class="space-y-4 flex-1">
                             ${state.draft.items.map((item, idx) => `
-                                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
-                                    <div class="flex justify-between items-start">
-                                         <span class="text-xs font-bold text-gray-400">Item #${idx + 1}</span>
-                                         ${state.draft.items.length > 1 ? `<button onclick="removeItem(${item.id})" class="text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}
+                                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 space-y-3">
+                                    <div class="flex justify-between"><span class="text-xs font-bold bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded text-gray-500">Item ${idx+1}</span><button onclick="removeItem(${item.id})" class="text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+                                    <input oninput="updateItem(${item.id}, 'name', this.value)" value="${item.name}" placeholder="Description" class="w-full p-3 bg-gray-50 dark:bg-slate-900 rounded-xl outline-none font-bold dark:text-white">
+                                    <div class="flex gap-3">
+                                        <div class="flex-1"><label class="text-[10px] font-bold text-gray-400 uppercase">Price</label><input type="number" oninput="updateItem(${item.id}, 'price', this.value)" value="${item.price}" class="w-full p-3 bg-gray-50 dark:bg-slate-900 rounded-xl outline-none font-bold dark:text-white"></div>
+                                        <div class="w-24"><label class="text-[10px] font-bold text-gray-400 uppercase">Qty</label><div class="flex bg-gray-50 dark:bg-slate-900 rounded-xl p-1"><button onclick="updateItem(${item.id},'qty',${Math.max(1,item.qty-1)})" class="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg shadow-sm flex items-center justify-center dark:text-white">-</button><div class="flex-1 text-center font-bold flex items-center justify-center dark:text-white">${item.qty}</div><button onclick="updateItem(${item.id},'qty',${item.qty+1})" class="w-8 h-8 bg-white dark:bg-slate-700 rounded-lg shadow-sm flex items-center justify-center dark:text-white">+</button></div></div>
                                     </div>
-                                    <input oninput="updateItem(${item.id}, 'name', this.value)" value="${item.name}" placeholder="Product Name" class="w-full p-2 bg-gray-50 rounded-lg border border-gray-200 font-medium">
-                                    <div class="flex gap-4">
-                                        <div class="flex-1">
-                                           <label class="text-xs font-bold text-gray-500 mb-1 block">Price</label>
-                                           <input type="number" oninput="updateItem(${item.id}, 'price', Number(this.value))" value="${item.price}" class="w-full p-2 bg-gray-50 rounded-lg border border-gray-200 font-medium">
-                                        </div>
-                                        <div class="w-24">
-                                           <label class="text-xs font-bold text-gray-500 mb-1 block">Qty</label>
-                                           <div class="flex items-center gap-2">
-                                             <button onclick="updateItem(${item.id}, 'qty', ${Math.max(1, item.qty - 1)})" class="p-1 bg-gray-100 rounded hover:bg-gray-200"><i data-lucide="minus" class="w-3 h-3"></i></button>
-                                             <span class="font-bold w-6 text-center text-sm">${item.qty}</span>
-                                             <button onclick="updateItem(${item.id}, 'qty', ${item.qty + 1})" class="p-1 bg-gray-100 rounded hover:bg-gray-200"><i data-lucide="plus" class="w-3 h-3"></i></button>
-                                           </div>
-                                        </div>
-                                    </div>
+                                </div>`).join('')}
+                            <button onclick="addNewItem()" class="w-full py-4 border-2 border-dashed border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-800">Add Item <i data-lucide="plus" class="w-5 h-5"></i></button>
+                        </div>
+                        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 z-40 flex gap-3 h-[90px] items-start">
+                            <button onclick="setCreateStep(1)" class="px-6 py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-white">Back</button>
+                            <button onclick="setCreateStep(3)" class="flex-1 bg-yellow-600 text-white py-3.5 rounded-xl font-bold shadow-lg flex justify-center items-center gap-2">Preview <i data-lucide="eye" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>`;
+            } else if (step === 3) {
+                 const theme = THEMES[state.settings.invoiceColor];
+                 html = `
+                    <div class="p-4 pb-32 slide-in">
+                        <div class="bg-white shadow-2xl mx-auto max-w-md print:w-full dark:bg-slate-800">
+                             <div class="bg-gradient-to-r ${theme.from} ${theme.to} p-6 text-white">
+                                <h1 class="text-2xl font-bold uppercase">${state.profile.name}</h1>
+                                <p class="opacity-80">${state.profile.phone}</p>
+                             </div>
+                             <div class="p-6 text-gray-800 dark:text-gray-200">
+                                <div class="flex justify-between mb-6">
+                                    <div><p class="text-xs text-gray-400 font-bold uppercase">Bill To</p><h3 class="font-bold text-lg">${state.draft.clientName}</h3></div>
+                                    <div class="text-right"><p class="text-xs text-gray-400 font-bold uppercase">Total Due</p><h3 class="font-bold text-lg ${theme.text}">${formatCurrency(total)}</h3></div>
                                 </div>
-                            `).join('')}
+                                <div class="space-y-3 mb-6">
+                                    ${state.draft.items.map(i => `<div class="flex justify-between text-sm border-b dark:border-slate-700 pb-2"><span>${i.name} <span class="text-gray-400">x${i.qty}</span></span><span class="font-bold">${formatCurrency(i.price*i.qty)}</span></div>`).join('')}
+                                </div>
+                                <div class="flex justify-between font-black text-xl border-t-2 border-black dark:border-white pt-4"><span>Total</span><span>${formatCurrency(total)}</span></div>
+                             </div>
                         </div>
-
-                        <button onclick="addNewItem()" class="w-full bg-white text-gray-700 border-2 border-dashed border-gray-300 px-4 py-3 rounded-xl font-medium hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="plus" class="w-5 h-5"></i> Add Another Item
-                        </button>
-
-                        <div class="flex gap-3 pt-4">
-                            <button onclick="setCreateStep(1)" class="flex-1 bg-transparent text-gray-600 hover:bg-gray-100 px-4 py-3 rounded-xl font-medium transition-all">Back</button>
-                            <button onclick="setCreateStep(3)" class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl font-medium shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                Preview <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                            </button>
+                        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 z-40 flex gap-3 h-[90px] items-start">
+                            <button onclick="setCreateStep(2)" class="px-6 py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-white">Edit</button>
+                            <button onclick="saveInvoice()" class="flex-1 bg-green-600 text-white py-3.5 rounded-xl font-bold shadow-lg flex justify-center items-center gap-2">Save Invoice <i data-lucide="check" class="w-5 h-5"></i></button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
-            else if (step === 3) {
-                // PREVIEW SCREEN
-                container.innerHTML = `
-                    <div class="min-h-full bg-gray-100 p-4 slide-in">
-                        <!-- Invoice Paper -->
-                        <div id="invoice-preview-container" class="bg-white rounded-none shadow-xl min-h-[500px] flex flex-col relative overflow-hidden mb-6">
-                            
-                            <!-- Header (Gold) -->
-                            <div class="bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 p-6 text-white relative">
-                                <div class="relative z-10">
-                                    <h1 class="text-2xl font-black uppercase tracking-wide mb-1">${state.profile.name}</h1>
-                                    <div class="flex items-center gap-2 text-sm font-medium opacity-90 mb-1">
-                                        <i data-lucide="phone" class="w-3 h-3"></i> ${state.profile.phone}
-                                    </div>
-                                    <div class="flex items-center gap-2 text-sm font-medium opacity-90">
-                                        <i data-lucide="mail" class="w-3 h-3"></i> ${state.profile.email}
-                                    </div>
-                                </div>
-                                <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-white opacity-10 rounded-full"></div>
-                            </div>
-
-                            <div class="p-6 flex-1">
-                                <div class="flex justify-between items-start mb-8 border-b border-dashed border-gray-200 pb-4">
-                                    <div>
-                                        <span class="text-xs text-gray-500 uppercase tracking-wider font-bold">Bill To</span>
-                                        <h3 class="text-lg font-bold text-gray-800">${state.draft.clientName || 'Client Name'}</h3>
-                                        <p class="text-sm text-gray-500">Date: ${new Date().toLocaleDateString()}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-xs text-gray-500 uppercase tracking-wider font-bold">Total Due</span>
-                                        <h3 class="text-2xl font-bold text-blue-600">${formatCurrency(total)}</h3>
-                                    </div>
-                                </div>
-
-                                <table class="w-full mb-8">
-                                    <thead>
-                                        <tr class="text-xs text-gray-500 border-b border-gray-200">
-                                            <th class="text-left font-medium py-2 uppercase tracking-wide">Item</th>
-                                            <th class="text-center font-medium py-2 uppercase tracking-wide">Qty</th>
-                                            <th class="text-right font-medium py-2 uppercase tracking-wide">Price</th>
-                                            <th class="text-right font-medium py-2 uppercase tracking-wide">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-sm">
-                                        ${state.draft.items.map(item => `
-                                            <tr class="border-b border-gray-50">
-                                                <td class="py-3 text-gray-800 font-medium">${item.name || 'Item'}</td>
-                                                <td class="py-3 text-center text-gray-600">${item.qty}</td>
-                                                <td class="py-3 text-right text-gray-600">${item.price}</td>
-                                                <td class="py-3 text-right text-gray-800 font-bold">${(item.qty * item.price).toLocaleString()}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-
-                                <div class="flex justify-end">
-                                    <div class="w-1/2 space-y-2">
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-500">Subtotal</span>
-                                            <span class="font-medium">${formatCurrency(total)}</span>
-                                        </div>
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-500">Tax (0%)</span>
-                                            <span class="font-medium">₹0</span>
-                                        </div>
-                                        <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-2 text-gray-900">
-                                            <span>Total</span>
-                                            <span>${formatCurrency(total)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-12 text-center">
-                                    <p class="text-xs text-gray-400 italic">Thank you for your business!</p>
-                                    <div class="mt-2 text-[10px] text-gray-300 uppercase tracking-widest">Generated by Invoice Pro</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-2 gap-4">
-                           <button onclick="setCreateStep(2)" class="bg-white text-gray-700 border border-gray-200 px-4 py-3 rounded-xl font-medium hover:bg-gray-50 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                Edit
-                           </button>
-                           <button onclick="saveInvoice()" class="bg-gradient-to-r from-yellow-600 to-yellow-500 text-white px-4 py-3 rounded-xl font-medium shadow-lg shadow-yellow-200 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i> Save
-                           </button>
-                        </div>
-                         <div class="grid grid-cols-1 gap-4 mt-4">
-                             <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-medium shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                               <i data-lucide="printer" class="w-4 h-4"></i> Print / Download PDF
-                             </button>
-                         </div>
-                    </div>
-                `;
+            container.innerHTML = html;
+            if(step===1) {
+                document.getElementById('inp-client').addEventListener('input', e=>state.draft.clientName=e.target.value);
+                document.getElementById('inp-phone').addEventListener('input', e=>state.draft.clientPhone=e.target.value);
+                document.getElementById('inp-code').addEventListener('input', e=>state.draft.clientCode=e.target.value);
+                document.getElementById('inp-date').addEventListener('input', e=>state.draft.dueDate=e.target.value);
             }
             lucide.createIcons();
         }
 
         function renderHistory(container) {
             container.innerHTML = `
-                <div class="p-4 space-y-4 fade-in">
-                    ${state.invoices.length === 0 ? `
-                        <div class="text-center py-20 text-gray-400">
-                            <i data-lucide="file-text" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
-                            <p>No invoices yet</p>
-                        </div>
-                    ` : state.invoices.map(inv => `
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-bold text-gray-800">${inv.client}</h4>
-                                <span class="text-xs font-bold px-2 py-1 rounded-full ${inv.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                                    ${inv.status}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-end">
-                                <div class="text-sm text-gray-500 space-y-1">
-                                    <p>${inv.id}</p>
-                                    <p>${inv.date}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-lg font-bold text-gray-900">${formatCurrency(inv.amount)}</p>
-                                    <div class="flex gap-2 mt-2 justify-end">
-                                        <button class="p-2 text-gray-500 hover:bg-gray-100 rounded-full"><i data-lucide="download" class="w-4 h-4"></i></button>
-                                        <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-full"><i data-lucide="share-2" class="w-4 h-4"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+                <div class="p-5 space-y-4 fade-in pb-20">
+                    <h2 class="text-2xl font-black text-gray-800 dark:text-white">History</h2>
+                    <div class="space-y-3">
+                         ${state.invoices.length ? state.invoices.map(inv => renderInvoiceCard(inv)).join('') : '<p class="text-center text-gray-400 mt-10">No records found</p>'}
+                    </div>
+                </div>`;
             lucide.createIcons();
+        }
+
+        function renderSettings(container) {
+             container.innerHTML = `
+                <div class="p-5 space-y-6 fade-in pb-20">
+                     <h2 class="text-2xl font-black text-gray-800 dark:text-white">Settings</h2>
+                     <div class="space-y-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Theme</p>
+                        <div class="flex bg-white dark:bg-slate-800 p-1 rounded-xl border border-gray-100 dark:border-slate-700">
+                             <button onclick="updateSetting('appTheme','light')" class="flex-1 py-2 rounded-lg font-bold text-sm ${state.settings.appTheme==='light'?'bg-gray-100 text-gray-800':'text-gray-400'}">Light</button>
+                             <button onclick="updateSetting('appTheme','dark')" class="flex-1 py-2 rounded-lg font-bold text-sm ${state.settings.appTheme==='dark'?'bg-slate-700 text-white':'text-gray-400'}">Dark</button>
+                        </div>
+                     </div>
+                     <div class="space-y-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Invoice Color</p>
+                        <div class="grid grid-cols-1 gap-2">
+                             ${Object.entries(THEMES).map(([k,t]) => `
+                                <button onclick="updateSetting('invoiceColor','${k}')" class="flex items-center gap-3 p-3 rounded-xl border ${state.settings.invoiceColor===k ? 'bg-white dark:bg-slate-700 border-blue-500 ring-1 ring-blue-500' : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700'}">
+                                    <div class="w-6 h-6 rounded-full bg-gradient-to-br ${t.from} ${t.to}"></div>
+                                    <span class="font-bold text-sm text-gray-700 dark:text-gray-200">${t.name}</span>
+                                </button>
+                             `).join('')}
+                        </div>
+                     </div>
+                </div>
+             `;
         }
 
         function renderProfile(container) {
             container.innerHTML = `
-                <div class="p-4 space-y-6 fade-in">
-                    <div class="flex flex-col items-center py-6">
-                       <div class="w-24 h-24 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-yellow-200 mb-4 border-4 border-white">
-                         ${state.profile.logoText}
-                       </div>
-                       <h2 class="text-xl font-bold text-center">${state.profile.name}</h2>
-                       <p class="text-gray-500 text-sm">${state.profile.email}</p>
+                <div class="p-5 space-y-6 fade-in pb-20">
+                    <div class="text-center">
+                        <div class="w-24 h-24 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full mx-auto flex items-center justify-center text-3xl font-black text-white shadow-lg mb-4">
+                            ${state.profile.logoText}
+                        </div>
+                        <h2 class="text-2xl font-black text-gray-800 dark:text-white">${state.profile.name}</h2>
                     </div>
-
-                    <div class="space-y-4">
-                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Business Details</h3>
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-medium text-gray-600 ml-1">Company Name</label>
-                            <input oninput="updateProfile('name', this.value)" value="${state.profile.name}" class="w-full p-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-medium text-gray-600 ml-1">Phone</label>
-                            <input oninput="updateProfile('phone', this.value)" value="${state.profile.phone}" class="w-full p-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                        </div>
-                         <div class="flex flex-col gap-1.5">
-                            <label class="text-sm font-medium text-gray-600 ml-1">Email</label>
-                            <input oninput="updateProfile('email', this.value)" value="${state.profile.email}" class="w-full p-3 rounded-xl bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                        </div>
-                        <button onclick="saveData(); alert('Profile Saved!')" class="w-full bg-blue-600 text-white px-4 py-3 rounded-xl font-medium shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all mt-4">Save Changes</button>
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl space-y-4 shadow-sm border border-gray-100 dark:border-slate-700">
+                        <div><label class="text-xs font-bold text-gray-400">Company Name</label><input oninput="updateProfile('name',this.value)" value="${state.profile.name}" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold dark:text-white outline-none"></div>
+                        <div><label class="text-xs font-bold text-gray-400">Phone</label><input oninput="updateProfile('phone',this.value)" value="${state.profile.phone}" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold dark:text-white outline-none"></div>
+                        <div><label class="text-xs font-bold text-gray-400">Email</label><input oninput="updateProfile('email',this.value)" value="${state.profile.email}" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-slate-900 font-bold dark:text-white outline-none"></div>
+                        <button onclick="saveData(); alert('Saved!')" class="w-full bg-gray-900 dark:bg-white dark:text-slate-900 text-white p-3 rounded-xl font-bold">Save Changes</button>
                     </div>
                 </div>
             `;
-            lucide.createIcons();
         }
 
-        // --- Logic Handlers ---
-
-        function handleStep1Next() {
-            if (!state.draft.clientName.trim()) {
-                alert('Please enter a client name');
-                return;
-            }
-            setCreateStep(2);
+        // --- 6. LOGIC HANDLERS ---
+        function addNewItem() { state.draft.items.push({ id: Date.now(), name: '', qty: 1, price: 0 }); setCreateStep(2); }
+        function removeItem(id) { state.draft.items = state.draft.items.filter(i => i.id !== id); setCreateStep(2); }
+        function updateItem(id, f, v) { 
+            const i = state.draft.items.find(x => x.id === id); 
+            if(i) { i[f] = v; if(f==='qty') setCreateStep(2); } 
         }
-
-        function addNewItem() {
-            state.draft.items.push({ id: Date.now(), name: '', qty: 1, price: 0 });
-            setCreateStep(2); // re-render
-        }
-
-        function removeItem(id) {
-            state.draft.items = state.draft.items.filter(i => i.id !== id);
-            setCreateStep(2);
-        }
-
-        function updateItem(id, field, value) {
-            const item = state.draft.items.find(i => i.id === id);
-            if (item) {
-                item[field] = value;
-                // We don't re-render the whole list for performance, rely on DOM for input updates, but update Total
-                if (field === 'price' || field === 'qty') {
-                     const total = state.draft.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
-                     document.querySelector('.text-blue-600.font-bold').innerText = 'Total: ' + formatCurrency(total);
-                }
-                // For Quantity buttons, we do re-render
-                if (field === 'qty') setCreateStep(2);
-            }
-        }
-
-        function updateProfile(field, value) {
-            state.profile[field] = value;
-        }
-
+        function updateSetting(k, v) { state.settings[k] = v; saveData(); renderSettings(document.getElementById('app-content')); }
+        function updateProfile(f, v) { state.profile[f] = v; }
+        
         function saveInvoice() {
-            const total = state.draft.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
-            const newInvoice = {
-                id: `INV-00${state.invoices.length + 1}`,
+            const total = state.draft.items.reduce((s, i) => s + (i.qty * i.price), 0);
+            const id = `INV-${String(state.invoices.length + 1).padStart(3,'0')}`;
+            state.invoices.unshift({
+                id,
                 client: state.draft.clientName,
-                date: new Date().toISOString().split('T')[0],
-                amount: total,
-                status: 'Pending',
+                clientPhone: state.draft.clientPhone,
+                clientCode: state.draft.clientCode,
+                date: new Date().toISOString(),
+                dueDate: state.draft.dueDate,
+                total,
+                paid: 0,
+                balance: total,
                 items: [...state.draft.items]
-            };
-            state.invoices.unshift(newInvoice);
+            });
             saveData();
             navigateTo('history');
         }
 
-        // Initialize App
-        lucide.createIcons();
-        navigateTo('home');
+        function editInvoice(id) {
+            const inv = state.invoices.find(i => i.id === id);
+            if(inv) {
+                state.draft = {
+                    clientName: inv.client, clientPhone: inv.clientPhone, clientCode: inv.clientCode || '+91',
+                    dueDate: inv.dueDate, items: [...inv.items]
+                };
+                // Remove old, we will save as new or update? 
+                // Simple implementation: Delete old and start create flow to replace it
+                state.invoices = state.invoices.filter(i => i.id !== id);
+                navigateTo('create');
+            }
+        }
+
+        // --- PAYMENT MODAL LOGIC ---
+        let currentInvId = null;
+        function openPaymentModal(id) {
+            currentInvId = id;
+            const modal = document.getElementById('modal-overlay');
+            const content = document.getElementById('modal-content');
+            const inv = state.invoices.find(i => i.id === id);
+            
+            content.innerHTML = `
+                <h3 class="text-xl font-black text-gray-800 dark:text-white mb-2">Record Payment</h3>
+                <p class="text-sm text-gray-500 mb-4">Balance Due: ${formatCurrency(inv.balance)}</p>
+                <input type="number" id="pay-amount" placeholder="Enter Amount" class="w-full p-4 bg-gray-50 dark:bg-slate-900 rounded-xl font-bold text-xl mb-4 dark:text-white outline-none focus:ring-2 ring-yellow-500">
+                <div class="flex gap-3">
+                    <button onclick="closeModal()" class="flex-1 py-3 font-bold text-gray-500 dark:text-gray-400">Cancel</button>
+                    <button onclick="submitPayment()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg">Confirm</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-overlay');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function submitPayment() {
+            const amt = Number(document.getElementById('pay-amount').value);
+            if (!amt || amt <= 0) return alert('Invalid Amount');
+            
+            const inv = state.invoices.find(i => i.id === currentInvId);
+            if (inv) {
+                if(amt > inv.balance) return alert('Amount exceeds balance');
+                inv.paid += amt;
+                inv.balance -= amt;
+                saveData();
+                closeModal();
+                navigateTo('invoice-detail', currentInvId);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', initApp);
 
     </script>
 </body>
